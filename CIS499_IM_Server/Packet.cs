@@ -14,7 +14,10 @@ namespace CIS499_IM_Server
         /// </summary>
         private string Message;
 
-        private string InternetProtoAddress;
+        /// <summary>
+        /// Sender IP address
+        /// </summary>
+        private string IPSrc;
 
         private uint SenderID;
 
