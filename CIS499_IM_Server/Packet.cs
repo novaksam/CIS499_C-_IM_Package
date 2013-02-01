@@ -19,6 +19,11 @@ namespace CIS499_IM_Server
         /// </summary>
         private string IPSrc;
 
+        /// <summary>
+        /// Target IP address
+        /// </summary>
+        private string IPDst;
+
         private uint SenderID;
 
         private uint RecepientID;
