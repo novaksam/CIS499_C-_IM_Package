@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="DBInteract.cs" />
     <Compile Include="Main_Class.cs">
       <SubType>Component</SubType>
     </Compile>

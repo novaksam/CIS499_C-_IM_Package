@@ -1,18 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="UserClass.cs" company="Sam Novak">
+//   CIS499 - 2013 - IM Server
+// </copyright>
+// <summary>
+//   Defines the UserClass type.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace CIS499_IM_Server
 {
-    class UserClass
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// The user class.
+    /// </summary>
+    internal class UserClass
     {
-        private string UserName;
+        /// <summary>
+        /// Gets the user name.
+        /// </summary>
+        internal string UserName { get; private set; }
 
-        private uint UserID;
+        /// <summary>
+        /// Gets the user id.
+        /// </summary>
+        internal uint UserId { get; private set; }
 
-        private string passwordHash;
+        /// <summary>
+        /// Gets the password hash.
+        /// </summary>
+        internal string PasswordHash { get; private set; }
 
-        private bool loggedIn;
+        /// <summary>
+        /// Gets a value indicating whether logged in.
+        /// </summary>
+        internal bool LoggedIn { get; private set; }
+
+        /// <summary>
+        /// Gets the friends.
+        /// </summary>
+        internal List<UserClass> Friends { get; private set; }
+
     }
 }
