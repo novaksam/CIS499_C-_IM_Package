@@ -1,31 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Packet.cs" company="Sam Novak">
+//   CIS499 - 2013 - IM Server
+// </copyright>
+// <summary>
+//   This class serves to provide a packet structure for all message related interactions.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace CIS499_IM_Server
 {
-    class Packet
+    /// <summary>
+    ///     This class serves to provide a packet structure for all message related interactions.
+    /// </summary>
+    internal class Packet
     {
+        #region Fields
 
         /// <summary>
-        /// String containing the message being sent.
-        /// this might be encrypted later, but for now clear text.
+        ///     Target IP address
         /// </summary>
-        private string Message;
+        private string IPDst;
 
         /// <summary>
-        /// Sender IP address
+        ///     Sender IP address
         /// </summary>
         private string IPSrc;
 
         /// <summary>
-        /// Target IP address
+        ///     String containing the message being sent.
+        ///     this might be encrypted later, but for now clear text.
         /// </summary>
-        private string IPDst;
+        private string Message;
 
+        /// <summary>
+        ///     UserID of the target
+        /// </summary>
+        private uint RecepientID;
+
+        /// <summary>
+        ///     UserID of the sender
+        /// </summary>
         private uint SenderID;
 
-        private uint RecepientID;
+        #endregion
+
+        #region 
+
+        #endregion
     }
 }

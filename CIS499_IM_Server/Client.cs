@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Sockets;
-using System.Net.Security;
-using System.Security.Authentication;
 using System.IO;
+using System.Linq;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Text;
 using System.Threading;
 
 namespace CIS499_IM_Server
