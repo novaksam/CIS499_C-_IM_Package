@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CIS499_IM_Server
 {
-    class User
+    class UserClass
     {
         private string UserName;
 
