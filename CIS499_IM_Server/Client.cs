@@ -37,7 +37,7 @@ namespace CIS499_IM_Server
                 Console.WriteLine("[{0}] New connection!", DateTime.Now);
                 netStream = client.GetStream();
                 ssl = new SslStream(netStream, false);
-                ssl.AuthenticateAsServer(prog.cert, false, SslProtocols.Tls, true);
+                ssl.AuthenticateAsServer(prog.Cert, false, SslProtocols.Tls, true);
                 Console.WriteLine("[{0}] Connection authenticated!", DateTime.Now);
                 // Now we have encrypted connection.
 
@@ -60,10 +60,10 @@ namespace CIS499_IM_Server
                         {
                             if (logMode == IM_Register)  // Register mode
                             {
-                                if (!prog.users.ContainsKey(userName))  // User already exists?
+                                if (!prog.Users.ContainsKey(userName))  // User already exists?
                                 {
                                     userInfo = new UserInfo(userName, password, this);
-                                    prog.users.Add(userName, userInfo);  // Add new user
+                                    prog.Users.Add(userName, userInfo);  // Add new user
                                     bw.Write(IM_OK);
                                     bw.Flush();
                                     Console.WriteLine("[{0}] ({1}) Registered new user", DateTime.Now, userName);
@@ -75,7 +75,7 @@ namespace CIS499_IM_Server
                             }
                             else if (logMode == IM_Login)  // Login mode
                             {
-                                if (prog.users.TryGetValue(userName, out userInfo))  // User exists?
+                                if (prog.Users.TryGetValue(userName, out userInfo))  // User exists?
                                 {
                                     if (password == userInfo.Password)  // Is password OK?
                                     {
@@ -138,7 +138,7 @@ namespace CIS499_IM_Server
                         bw.Write(who);
 
                         UserInfo info;
-                        if (prog.users.TryGetValue(who, out info))
+                        if (prog.Users.TryGetValue(who, out info))
                         {
                             if (info.LoggedIn)
                                 bw.Write(true);   // Available
@@ -155,7 +155,7 @@ namespace CIS499_IM_Server
                         string msg = br.ReadString();
 
                         UserInfo recipient;
-                        if (prog.users.TryGetValue(to, out recipient))
+                        if (prog.Users.TryGetValue(to, out recipient))
                         {
                             // Is recipient logged in?
                             if (recipient.LoggedIn)
