@@ -15,6 +15,18 @@ namespace CIS499_IM_Server
 
     public class Program
     {
+        /// <summary>
+        /// The name of the process logging events
+        /// In this case "C# Instant message server"
+        /// </summary>
+        private const string EventSource = "C# Instant message server";
+
+        /// <summary>
+        /// Target event log for event logging
+        /// System, Application, etc
+        /// </summary>
+        private const string EventLogName = "Application";
+
         static void Main(string[] args)
         {
             Program p = new Program();
@@ -91,10 +103,42 @@ namespace CIS499_IM_Server
             catch { }
         }
 
-        public void writeEvent(string message)
+        #region Event Log
+        /// <summary>
+        /// The write event.
+        /// </summary>
+        /// <param name="message">
+        /// The message.
+        /// </param>
+        public void WriteEvent(string message)
         {
-            
+            EventLog.WriteEntry(EventSource, message);
         }
+
+        /// <summary>
+        /// For logging exceptions during run time
+        /// </summary>
+        /// <param name="ex">
+        /// The exception to be logged
+        /// </param>
+        internal void WriteError(Exception ex)
+        {
+            EventLog.WriteEntry(EventSource, ex.Message, EventLogEntryType.Error, 1144);
+        }
+
+        /// <summary>
+        /// Creates the event log source for the service.
+        /// Only ran during startup of the service.
+        /// </summary>
+        private void CreateEventSource()
+        {
+            if (!EventLog.SourceExists(EventSource))
+            {
+                EventLog.CreateEventSource(EventSource, EventLogName);
+            }
+        }
+
+        #endregion
     }
 
     #region extra code
