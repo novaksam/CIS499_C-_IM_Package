@@ -8,3 +8,4 @@ CIS397_IM_Package/obj/x86*
 CIS499_IM_Server/obj/x86/Debug*
 
 packages/*/
+*.cache

@@ -27,17 +27,6 @@ namespace CIS499_IM_Server
     public class Program
     {
         #region Properties and Fields
-        /// <summary>
-        /// The name of the process logging events
-        /// In this case "C# Instant message server"
-        /// </summary>
-        private const string EventSource = "C# Instant message server";
-
-        /// <summary>
-        /// Target event log for event logging
-        /// System, Application, etc
-        /// </summary>
-        private const string EventLogName = "Application";
 
         #region Runtime configuration
 
@@ -52,7 +41,7 @@ namespace CIS499_IM_Server
         /// When they initially hit the port the server will send back something
         /// and if the client returns something particular they get added to the list.
         /// </summary>
-        private List<IPAddress> clients;
+        private static List<IPAddress> clients = new List<IPAddress>();
 
         // Self-signed certificate for SSL encryption.
         // You can generate one using my generate_
@@ -88,8 +77,8 @@ namespace CIS499_IM_Server
         /// </param>
         public static void Main(string[] args)
         {
-
-            var p = new Program();
+            clients.Add(IPAddress.Parse("127.0.0.1"));
+            var r = new Program(clients);
             Console.WriteLine();
             Console.WriteLine("Press enter to close program.");
             Console.ReadLine();
@@ -109,12 +98,11 @@ namespace CIS499_IM_Server
         /// </param>
         public Program(List<IPAddress> clients)
         {
-            this.clients = clients;
+            // this.clients = clients;
+            DBInteract dbInteract = new DBInteract();
             this.LoadSettings();
-            this.WriteEvent("IM server starting");
-            Console.Title = "InstantMessenger Server";
-            Console.WriteLine("----- InstantMessenger Server -----");
-            LoadUsers();
+            EventLogging.WriteEvent("IM server starting - " + DateTime.Now, EventLogEntryType.Information);
+            // LoadUsers();
             Console.WriteLine("[{0}] Starting server...", DateTime.Now);
 
             this.Server = new TcpListener(IPAddress.Parse("127.0.0.1"), this.port);
@@ -136,10 +124,6 @@ namespace CIS499_IM_Server
 
         string usersFileName = Environment.CurrentDirectory + "\\users.dat";
 
-        private Program()
-        {
-        }
-
         /// <summary>
         /// Saves Users
         /// </summary>
@@ -156,7 +140,7 @@ namespace CIS499_IM_Server
             }
             catch (Exception e)
             {
-                this.WriteError(e);
+                EventLogging.WriteError(e);
             }
         }
 
@@ -177,7 +161,7 @@ namespace CIS499_IM_Server
             }
             catch (Exception ex)
             {
-                this.WriteError(ex);
+                EventLogging.WriteError(ex);
             }
         }
 
@@ -186,50 +170,12 @@ namespace CIS499_IM_Server
         /// </summary>
         private void LoadSettings()
         {
-            this.clients.Add(IPAddress.Parse("127.0.0.1"));
+            // clients.Add(IPAddress.Parse("127.0.0.1"));
             this.port = int.Parse(System.Configuration.ConfigurationSettings.AppSettings["port"]);
             this.Cert = new X509Certificate2(
                 System.Configuration.ConfigurationSettings.AppSettings["certName"],
                 System.Configuration.ConfigurationSettings.AppSettings["certPass"]);
-
         }
-
-        #region Event Log
-        /// <summary>
-        /// The write event.
-        /// </summary>
-        /// <param name="message">
-        /// The message.
-        /// </param>
-        public void WriteEvent(string message)
-        {
-            EventLog.WriteEntry(EventSource, message);
-        }
-
-        /// <summary>
-        /// For logging exceptions during run time
-        /// </summary>
-        /// <param name="ex">
-        /// The exception to be logged
-        /// </param>
-        internal void WriteError(Exception ex)
-        {
-            EventLog.WriteEntry(EventSource, ex.Message, EventLogEntryType.Error, 1144);
-        }
-
-        /// <summary>
-        /// Creates the event log source for the service.
-        /// Only ran during startup of the service.
-        /// </summary>
-        private void CreateEventSource()
-        {
-            if (!EventLog.SourceExists(EventSource))
-            {
-                EventLog.CreateEventSource(EventSource, EventLogName);
-            }
-        }
-
-        #endregion
     }
 
     #region extra code
