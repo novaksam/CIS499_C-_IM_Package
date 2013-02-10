@@ -8,5 +8,8 @@
     <Setting Name="Port" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2002</Value>
     </Setting>
+    <Setting Name="Cert_Owner" Type="System.String" Scope="User">
+      <Value Profile="(Default)">UWSP CNMT</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

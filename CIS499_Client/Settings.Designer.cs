@@ -47,5 +47,17 @@ namespace CIS499_Client {
                 this["Port"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("UWSP CNMT")]
+        public string Cert_Owner {
+            get {
+                return ((string)(this["Cert_Owner"]));
+            }
+            set {
+                this["Cert_Owner"] = value;
+            }
+        }
     }
 }
