@@ -22,6 +22,7 @@ namespace CIS499_Client
         public MainWindow()
         {
             InitializeComponent();
+            
         }
     }
 }

@@ -77,11 +77,17 @@ namespace CIS499_IM_Server
         /// </param>
         public static void Main(string[] args)
         {
+            // Adds local host
             clients.Add(IPAddress.Parse("127.0.0.1"));
+
+            // Adds the local outward facing IP address
+            clients.AddRange(Dns.GetHostEntry(Dns.GetHostName()).AddressList);
+
+            // Starts the program
             var r = new Program(clients);
-            Console.WriteLine();
-            Console.WriteLine("Press enter to close program.");
-            Console.ReadLine();
+            //Console.WriteLine();
+            //Console.WriteLine("Press enter to close program.");
+            //Console.ReadLine();
         }
 
 
@@ -101,13 +107,12 @@ namespace CIS499_IM_Server
             // this.clients = clients;
             DBInteract dbInteract = new DBInteract();
             this.LoadSettings();
-            EventLogging.WriteEvent("IM server starting - " + DateTime.Now, EventLogEntryType.Information);
             // LoadUsers();
-            Console.WriteLine("[{0}] Starting server...", DateTime.Now);
+            EventLogging.WriteEvent("Starting server..." + DateTime.Now, EventLogEntryType.Information);
 
             this.Server = new TcpListener(IPAddress.Parse("127.0.0.1"), this.port);
             this.Server.Start();
-            Console.WriteLine("[{0}] Server is running properly!", DateTime.Now);
+            EventLogging.WriteEvent("Server is running properly!" + DateTime.Now, EventLogEntryType.Information);
 
             Listen();
         }
