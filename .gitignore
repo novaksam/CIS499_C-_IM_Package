@@ -1,11 +1,12 @@
-CIS499_IM_Server/server.pfx
+CIS397_IM_Package/bin*
+CIS397_IM_Package/obj/x86*
 
+CIS499_IM_Server/server.pfx
 CIS499_IM_Server/bin*
 CIS499_IM_Server/obj/x86*
 
-CIS397_IM_Package/bin*
-CIS397_IM_Package/obj/x86*
-CIS499_IM_Server/obj/x86/Debug*
+CIS499_Client/bin*
+CIS499_Client/obj/x86*
 
 packages/*/
 *.cache

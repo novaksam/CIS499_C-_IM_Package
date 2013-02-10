@@ -4,7 +4,7 @@
         Title="Login" Height="300" Width="300" xmlns:my="http://schemas.awesomium.com/winfx" ResizeMode="CanMinimize">
     <Grid>
         <PasswordBox Height="23" HorizontalAlignment="Left" Margin="84,111,0,0" Name="passwordBox1" VerticalAlignment="Top" Width="120" />
-        <Button Content="Sign in" Height="23" HorizontalAlignment="Center" Margin="0,150,0,0" Name="button1" VerticalAlignment="Top" Width="75" Padding="0" />
+        <Button Content="Sign in" Height="23" HorizontalAlignment="Center" Margin="0,150,0,0" Name="button1" VerticalAlignment="Top" Width="75" Padding="0" Click="button1_Click" />
         <StatusBar Height="23" HorizontalAlignment="Left" Margin="0,238,0,0" Name="statusBar1" VerticalAlignment="Top" Width="120" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="84,65,0,0" Name="textBox1" VerticalAlignment="Top" Width="120" />
         <Label Content="Username:" Height="28" HorizontalAlignment="Left" Margin="15,65,0,0" Name="label1" VerticalAlignment="Top" />
@@ -12,6 +12,7 @@
         <Menu HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="266">
             <MenuItem Header="Menu" >
                 <Button Content="Sign up" />
+                <Button Content="Options" />
                 <Separator />
                 <Button Content="Exit" />
             </MenuItem>

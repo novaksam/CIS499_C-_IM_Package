@@ -14,18 +14,13 @@ using System.Windows.Shapes;
 namespace CIS499_Client
 {
     /// <summary>
-    /// Interaction logic for Login.xaml
+    /// Interaction logic for Options.xaml
     /// </summary>
-    public partial class Login : Window
+    public partial class Options : Window
     {
-        public Login()
+        public Options()
         {
             InitializeComponent();
-        }
-
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            Networking networking = new Networking();
         }
     }
 }
