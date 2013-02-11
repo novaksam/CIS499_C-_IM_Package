@@ -38,6 +38,8 @@ namespace CIS499_Client
             
         }
 
+        // TODO add in code to update the displays based on if a user is online or not
+
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -50,7 +52,13 @@ namespace CIS499_Client
 
         private void listBox3_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            listBox3.SelectedItems.Clear();
+            
+            //listBox3.SelectedItems.Clear();
+        }
+
+        private void OnlineList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+
         }
     }
 }

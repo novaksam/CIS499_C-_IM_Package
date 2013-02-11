@@ -1,0 +1,11 @@
+﻿<Window x:Class="CIS499_Client.ChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ChatWindow" Height="300" Width="300">
+    <Grid>
+        <TextBox Height="166" HorizontalAlignment="Left" Margin="12,38,0,0" Name="ChatTextbox" VerticalAlignment="Top" Width="254" TextWrapping="WrapWithOverflow" IsReadOnly="True" />
+        <Button Content="Send" Height="39" HorizontalAlignment="Left" Margin="208,210,0,0" Name="SendBtn" VerticalAlignment="Top" Width="58" />
+        <Label Content="Chatting with:" Height="28" HorizontalAlignment="Left" Margin="12,0,0,0" Name="UserLabel" VerticalAlignment="Top" />
+        <TextBox Height="39" HorizontalAlignment="Left" Margin="12,210,0,0" Name="MessageTextbox" VerticalAlignment="Top" Width="190" AcceptsTab="True" KeyDown="MessageTextboxKeyDown" />
+    </Grid>
+</Window>

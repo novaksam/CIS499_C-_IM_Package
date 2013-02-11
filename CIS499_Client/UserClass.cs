@@ -14,7 +14,7 @@ namespace CIS499_Client
     /// <summary>
     /// The user class.
     /// </summary>
-    internal class UserClass
+    public class UserClass
     {
         /// <summary>
         /// Gets the user name.
@@ -71,6 +71,17 @@ namespace CIS499_Client
             this.PasswordHash = pass;
             this.LoggedIn = logged;
             this.Friends = new List<UserClass>();
+        }
+
+        /// <summary>
+        /// The to string.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        public override string ToString()
+        {
+            return this.UserName;
         }
     }
 }
