@@ -32,6 +32,7 @@ namespace CIS499_Client
         {
             InitializeComponent();
             App.FillUser(ref App.User);
+
             OnlineList.ItemsSource = App.User.Friends.Where(@class => @class.LoggedIn == true);
             OfflineList.ItemsSource = App.User.Friends.Where(@class => @class.LoggedIn == false);
             
@@ -45,6 +46,11 @@ namespace CIS499_Client
         private void ListBoxItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
 
+        }
+
+        private void listBox3_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            listBox3.SelectedItems.Clear();
         }
     }
 }

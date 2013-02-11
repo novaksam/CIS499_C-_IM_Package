@@ -46,6 +46,7 @@ namespace CIS499_Client
         /// </summary>
         internal UserClass()
         {
+            this.Friends = new List<UserClass>();
         }
 
         /// <summary>
@@ -69,6 +70,7 @@ namespace CIS499_Client
             this.UserId = id;
             this.PasswordHash = pass;
             this.LoggedIn = logged;
+            this.Friends = new List<UserClass>();
         }
     }
 }

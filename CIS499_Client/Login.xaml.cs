@@ -25,7 +25,10 @@ namespace CIS499_Client
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            Networking networking = new Networking();
+            //Networking networking = new Networking();
+            MainWindow main = new MainWindow();
+            main.Show();
+            this.Close();
         }
     }
 }
