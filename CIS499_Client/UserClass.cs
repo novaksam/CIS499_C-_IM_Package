@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="UserClass.cs" company="Sam Novak">
-//   CIS499 - 2013 - IM Server
+//   C# Instant Messenger XAML client
 // </copyright>
 // <summary>
 //   Defines the UserClass type.
@@ -39,7 +39,36 @@ namespace CIS499_Client
         /// <summary>
         /// Gets the friends.
         /// </summary>
-        internal List<UserClass> Friends { get; private set; }
+        internal List<UserClass> Friends { get;  set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserClass"/> class.
+        /// </summary>
+        internal UserClass()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserClass"/> class.
+        /// </summary>
+        /// <param name="username">
+        /// The username.
+        /// </param>
+        /// <param name="id">
+        /// The id.
+        /// </param>
+        /// <param name="pass">
+        /// The pass.
+        /// </param>
+        /// <param name="logged">
+        /// The logged.
+        /// </param>
+        internal UserClass(string username, uint id, string pass, bool logged)
+        {
+            this.UserName = username;
+            this.UserId = id;
+            this.PasswordHash = pass;
+            this.LoggedIn = logged;
+        }
     }
 }

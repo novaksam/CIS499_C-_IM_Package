@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="eventLogging.cs" company="Sam Novak">
-//   CIS499 - 2013 - IM client
+//   C# Instant Messenger XAML client
 // </copyright>
 // <summary>
 //   The event logging.

@@ -1,13 +1,13 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Packet.cs" company="Sam Novak">
-//   CIS499 - 2013 - IM Server
+//   C# Instant Messenger XAML client
 // </copyright>
 // <summary>
 //   This class serves to provide a packet structure for all message related interactions.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace CIS499_IM_Server
+namespace CIS499_Client
 {
     using System;
 

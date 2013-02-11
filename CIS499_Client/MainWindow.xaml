@@ -6,16 +6,18 @@
         <StatusBar Height="23" HorizontalAlignment="Left" Margin="0,288,0,0" Name="statusBar1" VerticalAlignment="Top" Width="120" />
         <ListBox HorizontalAlignment="Left" Margin="3,41,0,0" Name="listBox3" VerticalAlignment="Top" Height="241" Width="277">
             <ListBoxItem>
-                <Expander Header="Online" Height="110" Name="expander1" Width="234" Margin="5" IsExpanded="False" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Expander Header="Online" Height="Auto" Name="OnlineExpand" Width="234" Margin="5" IsExpanded="False" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <Grid>
-                        <ListBox Height="82" HorizontalAlignment="Left" Margin="1,6,0,0" Name="listBox1" VerticalAlignment="Top" Width="{Binding ElementName=expander1, Path=ActualWidth}" />
+                        <ListBox Height="82" HorizontalAlignment="Left" Margin="1,6,0,0" Name="OnlineList" VerticalAlignment="Top" Width="{Binding ElementName=OnlineExpand, Path=ActualWidth}" SelectionChanged="listBox1_SelectionChanged" Grid.ColumnSpan="2">
+                            <ListBoxItem MouseDoubleClick="ListBoxItem_MouseDoubleClick" />
+                        </ListBox>
                     </Grid>
                 </Expander>
             </ListBoxItem>
             <ListBoxItem>
-                <Expander Header="Offline" Height="110" Name="expander2" Width="234" Margin="5,5,5,0" IsExpanded="False" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Expander Header="Offline" Height="Auto" Name="OfflineExpander" Width="234" Margin="5,5,5,0" IsExpanded="False" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <Grid>
-                        <ListBox Height="100" HorizontalAlignment="Left" Margin="1,6,0,0" Name="listBox2" VerticalAlignment="Top" Width="{Binding ElementName=expander2, Path=ActualWidth}" />
+                        <ListBox Height="100" HorizontalAlignment="Left" Margin="1,6,0,0" Name="OfflineList" VerticalAlignment="Top" Width="{Binding ElementName=OfflineExpander, Path=ActualWidth}" />
                     </Grid>
                 </Expander>
             </ListBoxItem>
