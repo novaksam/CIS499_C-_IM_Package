@@ -9,12 +9,14 @@
 
 namespace CIS499_Client
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// The user class.
     /// </summary>
-    public class UserClass
+    [Serializable]
+    public class UserClass : IDisposable
     {
         /// <summary>
         /// Gets the user name.
@@ -82,6 +84,16 @@ namespace CIS499_Client
         public override string ToString()
         {
             return this.UserName;
+        }
+
+        /// <summary>
+        /// The dispose.
+        /// </summary>
+        public void Dispose()
+        {
+            this.UserName = null;
+            this.PasswordHash = null;
+            this.Friends = null;
         }
     }
 }

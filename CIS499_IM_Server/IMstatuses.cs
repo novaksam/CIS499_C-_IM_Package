@@ -1,17 +1,17 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IMstatuses.cs" company="Sam Novak">
-//   C# Instant Messenger XAML client
+//   CIS499 - 2013 - IM Server
 // </copyright>
 // <summary>
 //   The im statuses.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-// ReSharper disable InconsistentNaming
-namespace CIS499_Client
+namespace CIS499_IM_Server
 {
     using System.Diagnostics.CodeAnalysis;
 
+    // ReSharper disable InconsistentNaming
     /// <summary>
     /// The instant message statuses.
     /// </summary>

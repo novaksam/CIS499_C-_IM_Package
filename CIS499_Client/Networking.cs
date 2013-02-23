@@ -16,6 +16,7 @@ namespace CIS499_Client
     using System.Net;
     using System.Net.Security;
     using System.Net.Sockets;
+    using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading;
@@ -46,6 +47,11 @@ namespace CIS499_Client
         private SocketException failedConnect = new SocketException(543);
 
         /// <summary>
+        /// Wrong password exception
+        /// </summary>
+        private Exception wrongPasswordException = new Exception("Password incorrect");
+
+        /// <summary>
         /// The security stream.
         /// </summary>
         private SslStream ssl;
@@ -61,10 +67,18 @@ namespace CIS499_Client
         private TcpListener listener;
 
         /// <summary>
+        /// Boolean for the connection state
+        /// </summary>
+        private Boolean loggedIn;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Networking"/> class. 
         /// Default constructor
         /// </summary>
-        public Networking()
+        /// <param name="user">
+        /// The user.
+        /// </param>
+        public Networking(UserClass user)
         {
             // Creates the connection
             this.tcpClient = new TcpClient(Settings.Default.Server, Settings.Default.Port);
@@ -73,7 +87,8 @@ namespace CIS499_Client
             {
                 throw this.failedConnect;
             }
-            
+
+            this.loggedIn = true;
             // this.Ping(tcpClient);
 
             NetworkStream stream = this.tcpClient.GetStream();
@@ -81,9 +96,44 @@ namespace CIS499_Client
             this.ssl.AuthenticateAsClient(Settings.Default.Cert_Owner);
             this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
             this.reader = new BinaryReader(this.ssl, Encoding.UTF8);
-            System.Threading.Thread listen = new Thread(this.listen);
-            listen.Start();
+            var login = this.Login(user);
+            switch (login)
+            {
+                    // Proceed as normal
+                case ImStatuses.IM_OK:
+                    break;
 
+                    // Wrong password
+                case ImStatuses.IM_WrongPass:
+                    this.wrongPasswordException.Source = "User login";
+                    throw this.wrongPasswordException;
+
+            }
+
+            var threadStart = new ParameterizedThreadStart(o => this.listen(user));
+            var listenMeth = new Thread(threadStart);
+            listenMeth.Start();
+
+
+        }
+
+        /// <summary>
+        /// The login.
+        /// </summary>
+        /// <param name="user">
+        /// The user.
+        /// </param>
+        /// <returns>
+        /// The <see cref="byte"/>.
+        /// </returns>
+        private byte Login(UserClass user)
+        {
+            this.writer.Write(ImStatuses.IM_Login);
+            var formatter = new BinaryFormatter(); 
+            formatter.Serialize(this.ssl, user);
+
+            // writer.Write(user.PasswordHash);
+            return this.reader.ReadByte();
 
         }
 
@@ -97,12 +147,27 @@ namespace CIS499_Client
         // }
 
 
-        private void listen()
+        private void listen(UserClass user)
         {
-            while (running)
+            while (tcpClient.Connected)
             {
-                TcpClient tcpClient = this.listener.AcceptTcpClient();  // Accept incoming connection.
-            
+                // Read the incoming status
+                byte type = this.reader.ReadByte();
+
+                if (type == ImStatuses.IM_IsAvailable)
+                {
+                    string who = reader.ReadString();
+
+                    writer.Write(ImStatuses.IM_IsAvailable);
+                    writer.Write(user.UserId);
+                }
+                    
+
+                //TcpClient tcpClient = this.listener.AcceptTcpClient();  // Accept incoming connection.
+                //listener.Start();
+                //listener.BeginAcceptTcpClient(ar => listener.EndAcceptSocket(ar), listener);
+                //AsyncCallback aCallback = new AsyncCallback(ar => listener.BeginAcceptTcpClient(ar, listener));
+                //listener.
             }  
         }
 
@@ -181,7 +246,7 @@ namespace CIS499_Client
         /// The chain.
         /// </param>
         /// <param name="sslPolicyErrors">
-        /// The ssl policy errors.
+        /// The SSL policy errors.
         /// </param>
         /// <returns>
         /// The <see cref="bool"/>.
