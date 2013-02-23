@@ -9,6 +9,8 @@
 
 namespace CIS499_Client
 {
+    using System.Windows;
+
     /// <summary>
     /// Interaction logic for App
     /// </summary>
@@ -31,8 +33,10 @@ namespace CIS499_Client
             {
                 UserClass tempUser = new UserClass(i.ToString(), (uint)i, "taco", true);
                 user.Friends.Add(tempUser);
+                
             }
 
         }
+
     }
 }

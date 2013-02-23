@@ -10,6 +10,9 @@ using System.Threading;
 
 namespace CIS499_IM_Server
 {
+    using System.Runtime.Serialization;
+    using System.Runtime.Serialization.Formatters.Binary;
+
     public class Client
     {
         public Client(Program p, TcpClient c)
@@ -45,12 +48,21 @@ namespace CIS499_IM_Server
                 bw = new BinaryWriter(ssl, Encoding.UTF8);
 
                 // Say "hello".
-                bw.Write(IM_Hello);
+                bw.Write(ImStatuses.IM_Hello);
                 bw.Flush();
                 int hello = br.ReadInt32();
-                if (hello == IM_Hello)
+                if (hello == ImStatuses.IM_Hello)
                 {
+                    bw.Write(ImStatuses.IM_Login);
+                    bw.Flush();
+                    var taco = br.ReadInt32();
                     // Hello packet is OK. Time to wait for login or register.
+                    if (taco == ImStatuses.IM_Login)
+                    {
+                        IFormatter formatter = new BinaryFormatter();
+                        UserClass user = (UserClass)formatter.Deserialize(ssl);
+                        bw.Write(ImStatuses.IM_IsAvailable);
+                    }
                     byte logMode = br.ReadByte();
                     string userName = br.ReadString();
                     string password = br.ReadString();
@@ -58,22 +70,22 @@ namespace CIS499_IM_Server
                     {
                         if (password.Length < 20)  // Isn't password too long?
                         {
-                            if (logMode == IM_Register)  // Register mode
+                            if (logMode == ImStatuses.IM_Register)  // Register mode
                             {
                                 if (!prog.Users.ContainsKey(userName))  // User already exists?
                                 {
                                     userInfo = new UserInfo(userName, password, this);
                                     prog.Users.Add(userName, userInfo);  // Add new user
-                                    bw.Write(IM_OK);
+                                    bw.Write(ImStatuses.IM_OK);
                                     bw.Flush();
                                     Console.WriteLine("[{0}] ({1}) Registered new user", DateTime.Now, userName);
                                     prog.SaveUsers();
                                     Receiver();  // Listen to client in loop.
                                 }
                                 else
-                                    bw.Write(IM_Exists);
+                                    bw.Write(ImStatuses.IM_Exists);
                             }
-                            else if (logMode == IM_Login)  // Login mode
+                            else if (logMode == ImStatuses.IM_Login)  // Login mode
                             {
                                 if (prog.Users.TryGetValue(userName, out userInfo))  // User exists?
                                 {
@@ -84,22 +96,22 @@ namespace CIS499_IM_Server
                                             userInfo.Connection.CloseConn();
 
                                         userInfo.Connection = this;
-                                        bw.Write(IM_OK);
+                                        bw.Write(ImStatuses.IM_OK);
                                         bw.Flush();
                                         Receiver();  // Listen to client in loop.
                                     }
                                     else
-                                        bw.Write(IM_WrongPass);
+                                        bw.Write(ImStatuses.IM_WrongPass);
                                 }
                                 else
-                                    bw.Write(IM_NoExists);
+                                    bw.Write(ImStatuses.IM_NoExists);
                             }
                         }
                         else
-                            bw.Write(IM_TooPassword);
+                            bw.Write(ImStatuses.IM_TooPassword);
                     }
                     else
-                        bw.Write(IM_TooUsername);
+                        bw.Write(ImStatuses.IM_TooUsername);
                 }
                 CloseConn();
             }
@@ -130,11 +142,11 @@ namespace CIS499_IM_Server
                 {
                     byte type = br.ReadByte();  // Get incoming packet type.
 
-                    if (type == IM_IsAvailable)
+                    if (type == ImStatuses.IM_IsAvailable)
                     {
                         string who = br.ReadString();
 
-                        bw.Write(IM_IsAvailable);
+                        bw.Write(ImStatuses.IM_IsAvailable);
                         bw.Write(who);
 
                         UserInfo info;
@@ -149,7 +161,7 @@ namespace CIS499_IM_Server
                             bw.Write(false);      // Unavailable
                         bw.Flush();
                     }
-                    else if (type == IM_Send)
+                    else if (type == ImStatuses.IM_Send)
                     {
                         string to = br.ReadString();
                         string msg = br.ReadString();
@@ -161,7 +173,7 @@ namespace CIS499_IM_Server
                             if (recipient.LoggedIn)
                             {
                                 // Write received packet to recipient
-                                recipient.Connection.bw.Write(IM_Received);
+                                recipient.Connection.bw.Write(ImStatuses.IM_Received);
                                 recipient.Connection.bw.Write(userInfo.UserName);  // From
                                 recipient.Connection.bw.Write(msg);
                                 recipient.Connection.bw.Flush();
@@ -177,17 +189,17 @@ namespace CIS499_IM_Server
             Console.WriteLine("[{0}] ({1}) User logged out", DateTime.Now, userInfo.UserName);
         }
 
-        public const int IM_Hello = 2012;      // Hello
-        public const byte IM_OK = 0;           // OK
-        public const byte IM_Login = 1;        // Login
-        public const byte IM_Register = 2;     // Register
-        public const byte IM_TooUsername = 3;  // Too long username
-        public const byte IM_TooPassword = 4;  // Too long password
-        public const byte IM_Exists = 5;       // Already exists
-        public const byte IM_NoExists = 6;     // Doesn't exists
-        public const byte IM_WrongPass = 7;    // Wrong password
-        public const byte IM_IsAvailable = 8;  // Is user available?
-        public const byte IM_Send = 9;         // Send message
-        public const byte IM_Received = 10;    // Message received
+        //public const int IM_Hello = 2012;      // Hello
+        //public const byte IM_OK = 0;           // OK
+        //public const byte IM_Login = 1;        // Login
+        //public const byte IM_Register = 2;     // Register
+        //public const byte IM_TooUsername = 3;  // Too long username
+        //public const byte IM_TooPassword = 4;  // Too long password
+        //public const byte IM_Exists = 5;       // Already exists
+        //public const byte IM_NoExists = 6;     // Doesn't exists
+        //public const byte IM_WrongPass = 7;    // Wrong password
+        //public const byte IM_IsAvailable = 8;  // Is user available?
+        //public const byte IM_Send = 9;         // Send message
+        //public const byte IM_Received = 10;    // Message received
     }
 }

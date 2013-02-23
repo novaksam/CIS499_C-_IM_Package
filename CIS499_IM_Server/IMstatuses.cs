@@ -1,17 +1,17 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IMstatuses.cs" company="Sam Novak">
-//   CIS499 - 2013 - IM Server
+//   C# Instant Messenger XAML client
 // </copyright>
 // <summary>
 //   The im statuses.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+// ReSharper disable InconsistentNaming
 namespace CIS499_IM_Server
 {
     using System.Diagnostics.CodeAnalysis;
 
-    // ReSharper disable InconsistentNaming
     /// <summary>
     /// The instant message statuses.
     /// </summary>
@@ -21,7 +21,7 @@ namespace CIS499_IM_Server
         /// <summary>
         /// The i m_ hello.
         /// </summary>
-        public const int Im_Hello = 1337;      // Hello
+        public const int IM_Hello = 1337;      // Hello
         
         /// <summary>
         /// The i m_ ok.
@@ -77,6 +77,11 @@ namespace CIS499_IM_Server
         /// The i m_ received.
         /// </summary>
         public const byte IM_Received = 10;    // Message received
+
+        /// <summary>
+        /// Logout byte.
+        /// </summary>
+        public const byte IM_Logout = 11;
     }
     // ReSharper restore InconsistentNaming
 }

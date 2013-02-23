@@ -25,6 +25,9 @@ namespace CIS499_Client
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
+            var user = new UserClass(this.textBox1.Text, this.passwordBox1.Password, false);
+            Networking networking = new Networking(user);
+            
             //Networking networking = new Networking();
             MainWindow main = new MainWindow();
             main.Show();

@@ -21,7 +21,7 @@ namespace CIS499_Client
         /// <summary>
         /// The i m_ hello.
         /// </summary>
-        public const int Im_Hello = 1337;      // Hello
+        public const int IM_Hello = 1337;      // Hello
         
         /// <summary>
         /// The i m_ ok.

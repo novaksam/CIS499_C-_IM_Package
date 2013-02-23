@@ -96,24 +96,31 @@ namespace CIS499_Client
             this.ssl.AuthenticateAsClient(Settings.Default.Cert_Owner);
             this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
             this.reader = new BinaryReader(this.ssl, Encoding.UTF8);
-            var login = this.Login(user);
-            switch (login)
+            var hello = reader.ReadInt32();
+            if (hello == ImStatuses.IM_Hello)
             {
+                //var te = reader.ReadInt32();
+                writer.Write(ImStatuses.IM_Hello);
+                writer.Flush();
+                
+                var login = this.Login(user);
+                switch (login)
+                {
                     // Proceed as normal
-                case ImStatuses.IM_OK:
-                    break;
+                    case ImStatuses.IM_OK:
+                        break;
 
                     // Wrong password
-                case ImStatuses.IM_WrongPass:
-                    this.wrongPasswordException.Source = "User login";
-                    throw this.wrongPasswordException;
+                    case ImStatuses.IM_WrongPass:
+                        this.wrongPasswordException.Source = "User login";
+                        throw this.wrongPasswordException;
 
+                }
+
+                var threadStart = new ParameterizedThreadStart(o => this.listen(user));
+                var listenMeth = new Thread(threadStart);
+                listenMeth.Start();
             }
-
-            var threadStart = new ParameterizedThreadStart(o => this.listen(user));
-            var listenMeth = new Thread(threadStart);
-            listenMeth.Start();
-
 
         }
 
@@ -128,10 +135,10 @@ namespace CIS499_Client
         /// </returns>
         private byte Login(UserClass user)
         {
-            this.writer.Write(ImStatuses.IM_Login);
+            this.writer.Write(ImStatuses.IM_Hello);
+            writer.Flush();
             var formatter = new BinaryFormatter(); 
             formatter.Serialize(this.ssl, user);
-
             // writer.Write(user.PasswordHash);
             return this.reader.ReadByte();
 
@@ -160,6 +167,7 @@ namespace CIS499_Client
 
                     writer.Write(ImStatuses.IM_IsAvailable);
                     writer.Write(user.UserId);
+                    writer.Flush();
                 }
                     
 

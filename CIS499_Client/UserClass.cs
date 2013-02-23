@@ -18,6 +18,8 @@ namespace CIS499_Client
     [Serializable]
     public class UserClass : IDisposable
     {
+
+
         /// <summary>
         /// Gets the user name.
         /// </summary>
@@ -48,6 +50,26 @@ namespace CIS499_Client
         /// </summary>
         internal UserClass()
         {
+            this.Friends = new List<UserClass>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserClass"/> class.
+        /// </summary>
+        /// <param name="userName">
+        /// The user name.
+        /// </param>
+        /// <param name="passwordHash">
+        /// The password hash.
+        /// </param>
+        /// <param name="loggedIn">
+        /// The logged in.
+        /// </param>
+        public UserClass(string userName, string passwordHash, bool loggedIn)
+        {
+            this.UserName = userName;
+            this.PasswordHash = passwordHash;
+            this.LoggedIn = loggedIn;
             this.Friends = new List<UserClass>();
         }
 
