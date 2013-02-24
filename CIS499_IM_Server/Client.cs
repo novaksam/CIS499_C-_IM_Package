@@ -28,8 +28,8 @@ namespace CIS499_IM_Server
         public TcpClient client;
         public NetworkStream netStream;  // Raw-data stream of connection.
         public SslStream ssl;            // Encrypts connection using SSL.
-        public BinaryReader br;
-        public BinaryWriter bw;
+        public BinaryReader Reader;
+        public BinaryWriter Writer;
 
         UserInfo userInfo;  // Information about current user.
         
@@ -44,28 +44,36 @@ namespace CIS499_IM_Server
                 Console.WriteLine("[{0}] Connection authenticated!", DateTime.Now);
                 // Now we have encrypted connection.
 
-                br = new BinaryReader(ssl, Encoding.UTF8);
-                bw = new BinaryWriter(ssl, Encoding.UTF8);
+                this.Reader = new BinaryReader(ssl, Encoding.UTF8);
+                this.Writer = new BinaryWriter(ssl, Encoding.UTF8);
 
                 // Say "hello".
-                bw.Write(ImStatuses.IM_Hello);
-                bw.Flush();
-                int hello = br.ReadInt32();
+                Writer.Write(ImStatuses.IM_Hello);
+                Writer.Flush();
+                int hello = this.Reader.ReadInt32();
                 if (hello == ImStatuses.IM_Hello)
                 {
-                    bw.Write(ImStatuses.IM_Login);
-                    bw.Flush();
-                    var taco = br.ReadInt32();
+                    //Writer.Write(ImStatuses.IM_Login);
+                    //Writer.Flush();
+                    
+                    var taco = this.Reader.ReadByte();
                     // Hello packet is OK. Time to wait for login or register.
                     if (taco == ImStatuses.IM_Login)
                     {
-                        IFormatter formatter = new BinaryFormatter();
-                        UserClass user = (UserClass)formatter.Deserialize(ssl);
-                        bw.Write(ImStatuses.IM_IsAvailable);
+                        var length = this.Reader.ReadInt32();
+                        var use = this.Reader.ReadBytes(length);
+                        var user = UserClass.Deserialize(use);
+                        Writer.Write(ImStatuses.IM_IsAvailable);
                     }
-                    byte logMode = br.ReadByte();
-                    string userName = br.ReadString();
-                    string password = br.ReadString();
+
+
+
+
+
+
+                    byte logMode = this.Reader.ReadByte();
+                    string userName = this.Reader.ReadString();
+                    string password = this.Reader.ReadString();
                     if (userName.Length < 10) // Isn't username too long?
                     {
                         if (password.Length < 20)  // Isn't password too long?
@@ -76,14 +84,14 @@ namespace CIS499_IM_Server
                                 {
                                     userInfo = new UserInfo(userName, password, this);
                                     prog.Users.Add(userName, userInfo);  // Add new user
-                                    bw.Write(ImStatuses.IM_OK);
-                                    bw.Flush();
+                                    Writer.Write(ImStatuses.IM_OK);
+                                    Writer.Flush();
                                     Console.WriteLine("[{0}] ({1}) Registered new user", DateTime.Now, userName);
                                     prog.SaveUsers();
                                     Receiver();  // Listen to client in loop.
                                 }
                                 else
-                                    bw.Write(ImStatuses.IM_Exists);
+                                    Writer.Write(ImStatuses.IM_Exists);
                             }
                             else if (logMode == ImStatuses.IM_Login)  // Login mode
                             {
@@ -96,22 +104,22 @@ namespace CIS499_IM_Server
                                             userInfo.Connection.CloseConn();
 
                                         userInfo.Connection = this;
-                                        bw.Write(ImStatuses.IM_OK);
-                                        bw.Flush();
+                                        Writer.Write(ImStatuses.IM_OK);
+                                        Writer.Flush();
                                         Receiver();  // Listen to client in loop.
                                     }
                                     else
-                                        bw.Write(ImStatuses.IM_WrongPass);
+                                        Writer.Write(ImStatuses.IM_WrongPass);
                                 }
                                 else
-                                    bw.Write(ImStatuses.IM_NoExists);
+                                    Writer.Write(ImStatuses.IM_NoExists);
                             }
                         }
                         else
-                            bw.Write(ImStatuses.IM_TooPassword);
+                            Writer.Write(ImStatuses.IM_TooPassword);
                     }
                     else
-                        bw.Write(ImStatuses.IM_TooUsername);
+                        Writer.Write(ImStatuses.IM_TooUsername);
                 }
                 CloseConn();
             }
@@ -122,8 +130,8 @@ namespace CIS499_IM_Server
             try
             {
                 userInfo.LoggedIn = false;
-                br.Close();
-                bw.Close();
+                this.Reader.Close();
+                Writer.Close();
                 ssl.Close();
                 netStream.Close();
                 client.Close();
@@ -140,31 +148,31 @@ namespace CIS499_IM_Server
             {
                 while (client.Client.Connected)  // While we are connected.
                 {
-                    byte type = br.ReadByte();  // Get incoming packet type.
+                    byte type = this.Reader.ReadByte();  // Get incoming packet type.
 
                     if (type == ImStatuses.IM_IsAvailable)
                     {
-                        string who = br.ReadString();
+                        string who = this.Reader.ReadString();
 
-                        bw.Write(ImStatuses.IM_IsAvailable);
-                        bw.Write(who);
+                        Writer.Write(ImStatuses.IM_IsAvailable);
+                        Writer.Write(who);
 
                         UserInfo info;
                         if (prog.Users.TryGetValue(who, out info))
                         {
                             if (info.LoggedIn)
-                                bw.Write(true);   // Available
+                                Writer.Write(true);   // Available
                             else
-                                bw.Write(false);  // Unavailable
+                                Writer.Write(false);  // Unavailable
                         }
                         else
-                            bw.Write(false);      // Unavailable
-                        bw.Flush();
+                            Writer.Write(false);      // Unavailable
+                        Writer.Flush();
                     }
                     else if (type == ImStatuses.IM_Send)
                     {
-                        string to = br.ReadString();
-                        string msg = br.ReadString();
+                        string to = this.Reader.ReadString();
+                        string msg = this.Reader.ReadString();
 
                         UserInfo recipient;
                         if (prog.Users.TryGetValue(to, out recipient))
@@ -173,10 +181,10 @@ namespace CIS499_IM_Server
                             if (recipient.LoggedIn)
                             {
                                 // Write received packet to recipient
-                                recipient.Connection.bw.Write(ImStatuses.IM_Received);
-                                recipient.Connection.bw.Write(userInfo.UserName);  // From
-                                recipient.Connection.bw.Write(msg);
-                                recipient.Connection.bw.Flush();
+                                recipient.Connection.Writer.Write(ImStatuses.IM_Received);
+                                recipient.Connection.Writer.Write(userInfo.UserName);  // From
+                                recipient.Connection.Writer.Write(msg);
+                                recipient.Connection.Writer.Flush();
                                 Console.WriteLine("[{0}] ({1} -> {2}) Message sent!", DateTime.Now, userInfo.UserName, recipient.UserName);
                             }
                         }

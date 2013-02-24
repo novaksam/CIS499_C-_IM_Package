@@ -96,26 +96,33 @@ namespace CIS499_Client
             this.ssl.AuthenticateAsClient(Settings.Default.Cert_Owner);
             this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
             this.reader = new BinaryReader(this.ssl, Encoding.UTF8);
+            
+            
+            // Get the hello from the server
             var hello = reader.ReadInt32();
             if (hello == ImStatuses.IM_Hello)
             {
-                //var te = reader.ReadInt32();
+                // Send a hello to the server
                 writer.Write(ImStatuses.IM_Hello);
-                writer.Flush();
-                
-                var login = this.Login(user);
-                switch (login)
-                {
-                    // Proceed as normal
-                    case ImStatuses.IM_OK:
-                        break;
+                //// 
+                //var te = reader.ReadInt32();
+                //if (te == ImStatuses.IM_Login)
+                //{
+                    var login = this.Login(user);
 
-                    // Wrong password
-                    case ImStatuses.IM_WrongPass:
-                        this.wrongPasswordException.Source = "User login";
-                        throw this.wrongPasswordException;
+                    switch (login)
+                    {
+                            // Proceed as normal
+                        case ImStatuses.IM_OK:
+                            break;
 
-                }
+                            // Wrong password
+                        case ImStatuses.IM_WrongPass:
+                            this.wrongPasswordException.Source = "User login";
+                            throw this.wrongPasswordException;
+
+                    }
+                //}
 
                 var threadStart = new ParameterizedThreadStart(o => this.listen(user));
                 var listenMeth = new Thread(threadStart);
@@ -135,10 +142,12 @@ namespace CIS499_Client
         /// </returns>
         private byte Login(UserClass user)
         {
-            this.writer.Write(ImStatuses.IM_Hello);
-            writer.Flush();
-            var formatter = new BinaryFormatter(); 
-            formatter.Serialize(this.ssl, user);
+            
+            this.writer.Write(ImStatuses.IM_Login);
+            var serial = UserClass.Serialize(user);
+            this.writer.Write((int)serial.Length);
+            writer.Write(serial);
+            this.writer.Flush();
             // writer.Write(user.PasswordHash);
             return this.reader.ReadByte();
 
