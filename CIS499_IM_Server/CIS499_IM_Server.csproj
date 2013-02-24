@@ -109,7 +109,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SocketHelper.cs" />
-    <Compile Include="UserClass.cs" />
     <Compile Include="UserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +152,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UserClass\UserClass.csproj">
+      <Project>{A8A43E77-2EAA-443F-BF95-9985FC289D34}</Project>
+      <Name>UserClass</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

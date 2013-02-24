@@ -10,6 +10,7 @@
 namespace CIS499_Client
 {
     using System.Windows;
+    using UserClass;
 
     /// <summary>
     /// Interaction logic for App

@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Security.Authentication;
-using System.Text;
-using System.Threading;
-
-namespace CIS499_IM_Server
+﻿namespace CIS499_IM_Server
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net.Security;
+    using System.Net.Sockets;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Security.Authentication;
+    using System.Text;
+    using System.Threading;
+    using UserClass;
 
     public class Client
     {
@@ -64,6 +64,9 @@ namespace CIS499_IM_Server
                         var use = this.Reader.ReadBytes(length);
                         var user = UserClass.Deserialize(use);
                         Writer.Write(ImStatuses.IM_IsAvailable);
+                        // TODO call database to verify user
+                        // TODO call database to verify password
+                        // TODO return statement to user
                     }
 
 

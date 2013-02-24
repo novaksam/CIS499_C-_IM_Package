@@ -12,6 +12,7 @@ namespace CIS499_IM_Server
     using System;
     using System.Data.SqlServerCe;
     using System.IO;
+    using UserClass;
 
     /// <summary>
     /// The d b_ interact.

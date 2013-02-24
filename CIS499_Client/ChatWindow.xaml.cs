@@ -10,6 +10,7 @@
 namespace CIS499_Client
 {
     using System.Windows.Input;
+    using UserClass;
 
     /// <summary>
     /// Interaction logic for ChatWindow
