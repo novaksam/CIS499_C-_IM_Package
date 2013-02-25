@@ -72,7 +72,7 @@ namespace CIS499_IM_Server
                 new SqlCeCommand(
                     "CREATE TABLE Users_DB("
                     + "UserID int IDENTITY (100,1) NOT NULL UNIQUE, "
-                    + "UserName nvarchar(128) NOT NULL, "
+                    + "UserName nvarchar(128) NOT NULL UNIQUE, "
                     + "PassHash nvarchar(128) NOT NULL, "
                     + "Friends varbinary(5000), "
                     + "PRIMARY KEY (UserID));",

@@ -18,8 +18,6 @@ namespace CIS499_IM_Server
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Cryptography.X509Certificates;
-    using System.ServiceProcess;
-    using System.Text;
 
     /// <summary>
     /// The program.
@@ -84,12 +82,13 @@ namespace CIS499_IM_Server
             clients.AddRange(Dns.GetHostEntry(Dns.GetHostName()).AddressList);
 
             // Starts the program
-            var r = new Program(clients);
-            //Console.WriteLine();
-            //Console.WriteLine("Press enter to close program.");
-            //Console.ReadLine();
-        }
+            Program r;
+            r = new Program(clients);
 
+            // Console.WriteLine();
+            // Console.WriteLine("Press enter to close program.");
+            // Console.ReadLine();
+        }
 
         /// <summary>
         /// Users dictionary
@@ -97,6 +96,7 @@ namespace CIS499_IM_Server
         public Dictionary<string, UserInfo> Users = new Dictionary<string, UserInfo>();  // Information about users + connections info.
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Program"/> class. 
         /// The program! 
         /// </summary>
         /// <param name="clients">
@@ -105,8 +105,9 @@ namespace CIS499_IM_Server
         public Program(List<IPAddress> clients)
         {
             // this.clients = clients;
-            DBInteract dbInteract = new DBInteract();
+            var dbInteract = new DBInteract();
             this.LoadSettings();
+
             // LoadUsers();
             EventLogging.WriteEvent("Starting server..." + DateTime.Now, EventLogEntryType.Information);
 
@@ -114,20 +115,27 @@ namespace CIS499_IM_Server
             this.Server.Start();
             EventLogging.WriteEvent("Server is running properly!" + DateTime.Now, EventLogEntryType.Information);
 
-            Listen();
+            this.Listen();
         }
 
-        void Listen()  // Listen to incoming connections.
+        /// <summary>
+        /// The listen.
+        /// </summary>
+        internal void Listen()  // Listen to incoming connections.
         {
-            while (Running)
+            while (this.Running)
             {
-                TcpClient tcpClient = this.Server.AcceptTcpClient();  // Accept incoming connection.
+                var tcpClient = this.Server.AcceptTcpClient();  // Accept incoming connection.
                 // TODO Setup the client verification part
-                Client client = new Client(this, tcpClient);     // Handle in another thread.
+                Client client;     // Handle in another thread.
+                client = new Client(this, tcpClient);
             }
         }
 
-        string usersFileName = Environment.CurrentDirectory + "\\users.dat";
+        /// <summary>
+        /// The users file name.
+        /// </summary>
+        internal string UsersFileName = Environment.CurrentDirectory + "\\users.dat";
 
         /// <summary>
         /// Saves Users
@@ -137,8 +145,8 @@ namespace CIS499_IM_Server
             try
             {
                 Console.WriteLine("[{0}] Saving users...", DateTime.Now);
-                BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = new FileStream(usersFileName, FileMode.Create, FileAccess.Write);
+                var bf = new BinaryFormatter();
+                var file = new FileStream(this.UsersFileName, FileMode.Create, FileAccess.Write);
                 bf.Serialize(file, this.Users.Values.ToArray());  // Serialize UserInfo array
                 file.Close();
                 Console.WriteLine("[{0}] Users saved!", DateTime.Now);
@@ -157,11 +165,11 @@ namespace CIS499_IM_Server
             try
             {
                 Console.WriteLine("[{0}] Loading users...", DateTime.Now);
-                BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = new FileStream(usersFileName, FileMode.Open, FileAccess.Read);
-                UserInfo[] infos = (UserInfo[])bf.Deserialize(file); // Deserialize UserInfo array
+                var bf = new BinaryFormatter();
+                var file = new FileStream(this.UsersFileName, FileMode.Open, FileAccess.Read);
+                var infos = (UserInfo[])bf.Deserialize(file); // Deserialize UserInfo array
                 file.Close();
-                this.Users = infos.ToDictionary((u) => u.UserName, (u) => u); // Convert UserInfo array to Dictionary
+                this.Users = infos.ToDictionary(u => u.UserName, u => u); // Convert UserInfo array to Dictionary
                 Console.WriteLine("[{0}] Users loaded! ({1})", DateTime.Now, this.Users.Count);
             }
             catch (Exception ex)
@@ -176,19 +184,21 @@ namespace CIS499_IM_Server
         private void LoadSettings()
         {
             // clients.Add(IPAddress.Parse("127.0.0.1"));
-            this.port = int.Parse(System.Configuration.ConfigurationSettings.AppSettings["port"]);
-            this.Cert = new X509Certificate2(
-                System.Configuration.ConfigurationSettings.AppSettings["certName"],
-                System.Configuration.ConfigurationSettings.AppSettings["certPass"]);
+#pragma warning disable 612,618
+                this.port = int.Parse(System.Configuration.ConfigurationSettings.AppSettings["port"]);
+                this.Cert = new X509Certificate2(
+                    System.Configuration.ConfigurationSettings.AppSettings["certName"],
+                    System.Configuration.ConfigurationSettings.AppSettings["certPass"]);
+#pragma warning restore 612,618
         }
     }
 
     #region extra code
-    //using System.Net.Sockets;
-    //using System.Threading;
+    // using System.Net.Sockets;
+    // using System.Threading;
 
-    //static class Program
-    //{
+    // static class Program
+    // {
     //    /// <summary>
     //    /// http://msdn.microsoft.com/en-us/library/bb397809%28v=vs.90%29.aspx
     //    /// The main entry point for the application.
@@ -202,8 +212,6 @@ namespace CIS499_IM_Server
     //        };
     //        ServiceBase.Run(ServicesToRun);
     //    }
-
-
     //    static void Listen()
     //    {
     //        string output;
@@ -241,6 +249,6 @@ namespace CIS499_IM_Server
     //            helper.processMsg(tcpClient, stream, bytes);
     //        }
     //    }
-    //}
+    // }
     #endregion
 }

@@ -5,16 +5,15 @@
     <Grid>
         <PasswordBox Height="23" HorizontalAlignment="Left" Margin="84,111,0,0" Name="passwordBox1" VerticalAlignment="Top" Width="120" TabIndex="2" />
         <Button Content="Sign in" Height="23" HorizontalAlignment="Center" Margin="0,150,0,0" Name="button1" VerticalAlignment="Top" Width="75" Padding="0" Click="button1_Click" TabIndex="3" />
-        <StatusBar Height="23" HorizontalAlignment="Left" Margin="0,238,0,0" Name="statusBar1" VerticalAlignment="Top" Width="120" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="84,65,0,0" Name="textBox1" VerticalAlignment="Top" Width="120" TabIndex="1" />
         <Label Content="Username:" Height="28" HorizontalAlignment="Left" Margin="15,65,0,0" Name="label1" VerticalAlignment="Top" />
         <Label Content="Password:" Height="28" HorizontalAlignment="Left" Margin="15,106,0,0" Name="label2" VerticalAlignment="Top" />
-        <Menu HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="266">
-            <MenuItem Header="Menu" >
-                <Button Content="Sign up" />
-                <Button Content="Options" />
+        <Menu HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="266" Background="{x:Null}">
+            <MenuItem Header="Menu">
+                <Button Content="Sign up" Name="BtnReg" />
+                <Button Content="Options"  Name="BtnOpt" Click="BtnOpt_Click" />
                 <Separator />
-                <Button Content="Exit" />
+                <Button Content="Exit" Name="BtnQuit" />
             </MenuItem>
         </Menu>
     </Grid>

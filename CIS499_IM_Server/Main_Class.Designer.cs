@@ -1,6 +1,6 @@
 ﻿namespace CIS499_IM_Server
 {
-    partial class Main_Class
+    partial class MainClass
     {
         /// <summary> 
         /// Required designer variable.

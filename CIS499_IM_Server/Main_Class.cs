@@ -1,25 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.ServiceProcess;
-using System.Text;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Main_Class.cs" company="Sam Novak">
+//   CIS499 - 2013 - IM Server
+// </copyright>
+// <summary>
+//   Defines the Main_Class type.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace CIS499_IM_Server
 {
-    public partial class Main_Class : ServiceBase
+    using System.ServiceProcess;
+
+    /// <summary>
+    /// The main_ class.
+    /// </summary>
+    public partial class MainClass : ServiceBase
     {
-        public Main_Class()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainClass"/> class.
+        /// </summary>
+        public MainClass()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// The on start.
+        /// </summary>
+        /// <param name="args">
+        /// The arguments.
+        /// </param>
         protected override void OnStart(string[] args)
         {
         }
 
+        /// <summary>
+        /// The on stop.
+        /// </summary>
         protected override void OnStop()
         {
         }

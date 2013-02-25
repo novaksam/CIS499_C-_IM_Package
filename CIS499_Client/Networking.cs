@@ -10,13 +10,9 @@
 namespace CIS499_Client
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
-    using System.Net;
     using System.Net.Security;
     using System.Net.Sockets;
-    using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading;
@@ -90,46 +86,42 @@ namespace CIS499_Client
             }
 
             this.loggedIn = true;
-            // this.Ping(tcpClient);
 
+            // this.Ping(tcpClient);
             NetworkStream stream = this.tcpClient.GetStream();
             this.ssl = new SslStream(stream, false, ValidateCert);
             this.ssl.AuthenticateAsClient(Settings.Default.Cert_Owner);
             this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
             this.reader = new BinaryReader(this.ssl, Encoding.UTF8);
-            
-            
+
             // Get the hello from the server
             var hello = reader.ReadInt32();
             if (hello == ImStatuses.IM_Hello)
             {
                 // Send a hello to the server
-                writer.Write(ImStatuses.IM_Hello);
-                //// 
-                //var te = reader.ReadInt32();
-                //if (te == ImStatuses.IM_Login)
-                //{
-                    var login = this.Login(user);
+                this.writer.Write(ImStatuses.IM_Hello);
 
-                    switch (login)
-                    {
-                            // Proceed as normal
-                        case ImStatuses.IM_OK:
-                            break;
+                // var te = reader.ReadInt32();
+                // if (te == ImStatuses.IM_Login)
+                // {
+                var login = this.Login(user);
 
-                            // Wrong password
-                        case ImStatuses.IM_WrongPass:
-                            this.wrongPasswordException.Source = "User login";
-                            throw this.wrongPasswordException;
+                switch (login)
+                {
+                    // Proceed as normal
+                    case ImStatuses.IM_OK:
+                        break;
 
-                    }
-                //}
+                    // Wrong password
+                    case ImStatuses.IM_WrongPass:
+                        this.wrongPasswordException.Source = "User login";
+                        throw this.wrongPasswordException;
+                }
 
-                var threadStart = new ParameterizedThreadStart(o => this.listen(user));
+                var threadStart = new ParameterizedThreadStart(o => this.Listen(user));
                 var listenMeth = new Thread(threadStart);
                 listenMeth.Start();
             }
-
         }
 
         /// <summary>
@@ -143,12 +135,13 @@ namespace CIS499_Client
         /// </returns>
         private byte Login(UserClass user)
         {
-            
+
             this.writer.Write(ImStatuses.IM_Login);
             var serial = UserClass.Serialize(user);
             this.writer.Write((int)serial.Length);
-            writer.Write(serial);
+            this.writer.Write(serial);
             this.writer.Flush();
+
             // writer.Write(user.PasswordHash);
             return this.reader.ReadByte();
 
@@ -163,45 +156,50 @@ namespace CIS499_Client
         //    writeTemp.Flush();
         // }
 
-
-        private void listen(UserClass user)
+        /// <summary>
+        /// The listen.
+        /// </summary>
+        /// <param name="user">
+        /// The user.
+        /// </param>
+        private void Listen(UserClass user)
         {
-            while (tcpClient.Connected)
+            while (this.tcpClient.Connected)
             {
                 // Read the incoming status
-                byte type = this.reader.ReadByte();
+                var type = this.reader.ReadByte();
 
                 if (type == ImStatuses.IM_IsAvailable)
                 {
-                    string who = reader.ReadString();
+                    var who = this.reader.ReadString();
 
-                    writer.Write(ImStatuses.IM_IsAvailable);
-                    writer.Write(user.UserId);
-                    writer.Flush();
+                    this.writer.Write(ImStatuses.IM_IsAvailable);
+                    this.writer.Write(user.UserId);
+                    this.writer.Flush();
                 }
-                    
 
-                //TcpClient tcpClient = this.listener.AcceptTcpClient();  // Accept incoming connection.
-                //listener.Start();
-                //listener.BeginAcceptTcpClient(ar => listener.EndAcceptSocket(ar), listener);
-                //AsyncCallback aCallback = new AsyncCallback(ar => listener.BeginAcceptTcpClient(ar, listener));
-                //listener.
-            }  
+
+                // TcpClient tcpClient = this.listener.AcceptTcpClient();  // Accept incoming connection.
+                // listener.Start();
+                // listener.BeginAcceptTcpClient(ar => listener.EndAcceptSocket(ar), listener);
+                // AsyncCallback aCallback = new AsyncCallback(ar => listener.BeginAcceptTcpClient(ar, listener));
+                // listener.
+            }
         }
 
-        private void recieve()
+        /// <summary>
+        /// The receiver.
+        /// </summary>
+        private void Receive()
         {
-            //while (this.tcpClient.Connected)
-            //{
+            // while (this.tcpClient.Connected)
+            // {
             //    byte type = reader.ReadByte();  // Get incoming packet type.
-
             //    if (type == ImStatuses.IM_IsAvailable)
             //    {
             //        string who = reader.ReadString();
-
             //        writer.Write(ImStatuses.IM_IsAvailable);
             //        writer.Write(who);
-
             //        if (prog.Users.TryGetValue(who, out info))
             //        {
             //            if (info.LoggedIn)
@@ -217,7 +215,6 @@ namespace CIS499_Client
             //    {
             //        string to = reader.ReadString();
             //        string msg = reader.ReadString();
-
             //        UserClass recipient;
             //        if (prog.Users.TryGetValue(to, out recipient))
             //        {
@@ -233,7 +230,7 @@ namespace CIS499_Client
             //            }
             //        }
             //    }
-            //}
+            // }
         }
 
         /// <summary>
@@ -278,5 +275,5 @@ namespace CIS499_Client
             //    return false;
             return true; // Allow untrusted certificates.
         }
-}
+    }
 }

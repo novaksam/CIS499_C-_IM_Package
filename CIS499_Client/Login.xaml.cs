@@ -35,5 +35,16 @@
             main.Show();
             this.Close();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnOpt_Click(object sender, RoutedEventArgs e)
+        {
+            Options options = new Options();
+            options.ShowDialog();
+        }
     }
 }

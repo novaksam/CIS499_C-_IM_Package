@@ -1,35 +1,72 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SocketHelper.cs" company="Sam Novak">
+//   CIS499 - 2013 - IM Server
+// </copyright>
+// <summary>
+//   The socket helper.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace CIS499_IM_Server
 {
     using System.Net.Sockets;
+    using System.Text;
 
-    class SocketHelper
+    /// <summary>
+    /// The socket helper.
+    /// </summary>
+    internal class SocketHelper
     {
-        TcpClient mscClient;
-        string mstrMessage;
-        string mstrResponse;
-        byte[] bytesSent;
-        public void processMsg(TcpClient client, NetworkStream stream, byte[] bytesReceived)
+        /// <summary>
+        /// The client.
+        /// </summary>
+        internal TcpClient MscClient;
+
+        /// <summary>
+        /// The message.
+        /// </summary>
+        internal string MstrMessage;
+
+        /// <summary>
+        /// The response.
+        /// </summary>
+        internal string MstrResponse;
+
+        /// <summary>
+        /// The bytes sent.
+        /// </summary>
+        internal byte[] BytesSent;
+
+        /// <summary>
+        /// The process message.
+        /// </summary>
+        /// <param name="client">
+        /// The client.
+        /// </param>
+        /// <param name="stream">
+        /// The stream.
+        /// </param>
+        /// <param name="bytesReceived">
+        /// The bytes received.
+        /// </param>
+        public void ProcessMsg(TcpClient client, NetworkStream stream, byte[] bytesReceived)
         {
             // Handle the message received and  
             // send a response back to the client.
-            mstrMessage = Encoding.ASCII.GetString(bytesReceived, 0, bytesReceived.Length);
-            mscClient = client;
-            mstrMessage = mstrMessage.Substring(0, 5);
-            if (mstrMessage.Equals("Hello"))
+            this.MstrMessage = Encoding.ASCII.GetString(bytesReceived, 0, bytesReceived.Length);
+            this.MscClient = client;
+            this.MstrMessage = this.MstrMessage.Substring(0, 5);
+            if (this.MstrMessage.Equals("Hello"))
             {
-                mstrResponse = "Goodbye";
+                this.MstrResponse = "Goodbye";
             }
             else
             {
-                mstrResponse = "What?";
+                this.MstrResponse = "What?";
             }
-            bytesSent = Encoding.ASCII.GetBytes(mstrResponse);
-            stream.Write(bytesSent, 0, bytesSent.Length);
+
+            this.BytesSent = Encoding.ASCII.GetBytes(this.MstrResponse);
+            stream.Write(this.BytesSent, 0, this.BytesSent.Length);
         }
     }
 }

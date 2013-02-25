@@ -1,23 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="RegisterWindow.xaml.cs" company="Sam Novak">
+//   C# Instant Messenger XAML client
+// </copyright>
+// <summary>
+//   Interaction logic for RegisterWindow.xaml
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace CIS499_Client
 {
+    using System.Diagnostics.CodeAnalysis;
+    using System.Windows;
+
     /// <summary>
     /// Interaction logic for RegisterWindow.xaml
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
+    // ReSharper disable RedundantExtendsListEntry
     public partial class RegisterWindow : Window
+    // ReSharper restore RedundantExtendsListEntry
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegisterWindow"/> class.
+        /// </summary>
         public RegisterWindow()
         {
             InitializeComponent();

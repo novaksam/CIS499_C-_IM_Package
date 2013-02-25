@@ -1,8 +1,8 @@
 ﻿<Window x:Class="CIS499_Client.Options"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Options" Height="300" Width="300"
-        xmlns:p="clr-namespace:CIS499_Client">
+        Title="Options" Height="194" Width="271"
+        xmlns:p="clr-namespace:CIS499_Client" ResizeMode="NoResize" ShowInTaskbar="True" Topmost="True">
     <Grid>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="101,14,0,0" Name="txtIP" VerticalAlignment="Top" Width="120" TabIndex="1" MaxLines="1" Text="{Binding Source={x:Static p:Settings.Default},Path=Server }" />
         <Label Content="Server Address" Height="28" HorizontalAlignment="Left" Margin="12,12,0,0" Name="label1" VerticalAlignment="Top" />
@@ -10,5 +10,7 @@
         <Label Content="Server Port" Height="28" HorizontalAlignment="Left" Margin="12,41,0,0" Name="label2" VerticalAlignment="Top" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="101,72,0,0" MaxLines="1" Name="txtCert" TabIndex="1" Text="{Binding Source={x:Static p:Settings.Default}, Path=Cert_Owner}" VerticalAlignment="Top" Width="120" />
         <Label Content="Cert Owner" Height="28" HorizontalAlignment="Left" Margin="12,70,0,0" Name="label3" VerticalAlignment="Top" />
+        <Button Content="Ok" Height="23" HorizontalAlignment="Left" Margin="65,119,0,0" Name="btnOk" VerticalAlignment="Top" Width="75" TabIndex="4" Click="BtnOkClick" />
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="146,119,0,0" Name="btnCancel" VerticalAlignment="Top" Width="75" TabIndex="5" Click="BtnCancelClick" />
     </Grid>
 </Window>
