@@ -154,6 +154,7 @@ namespace UserClass
             memStream.Write(bytes, 0, bytes.Length);
             memStream.Seek(0, SeekOrigin.Begin);
             var obj = (UserClass)binForm.Deserialize(memStream);
+            memStream.Dispose();
             return obj;
         }
     }

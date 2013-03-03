@@ -2,6 +2,9 @@
 // <copyright company="Sam Novak" file="UsersDBRepository.cs">
 //   CIS499 - 2013 - IM Server
 // </copyright>
+// <summary>
+//   Default IUsers_DBRepository implementation
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 namespace CIS499_IM_Server.DatabaseClasses
 {
@@ -10,6 +13,7 @@ namespace CIS499_IM_Server.DatabaseClasses
     using System.Data;
     using System.Data.SqlServerCe;
     using System.Diagnostics.CodeAnalysis;
+
     using UserClass;
 
     /// <summary>
@@ -29,10 +33,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         #region Public Methods and Operators
 
         /// <summary>
-        /// Gets the number of records in the table
+        ///     Gets the number of records in the table
         /// </summary>
         /// <returns>
-        /// The <see cref="int"/>.
+        ///     The <see cref="int" />.
         /// </returns>
         public int Count()
         {
@@ -58,13 +62,13 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// Inserts a new record to the table without specifying the primary key
         /// </summary>
         /// <param name="userName">
-        ///     UserName value
+        /// UserName value
         /// </param>
         /// <param name="passHash">
-        ///     PassHash value
+        /// PassHash value
         /// </param>
         /// <param name="friends">
-        ///     Friends value
+        /// Friends value
         /// </param>
         public void Create(string userName, string passHash, List<UserClass> friends)
         {
@@ -120,7 +124,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                 throw new ArgumentException("Max length for PassHash is 128");
             }
 
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText =
                     "INSERT INTO [Users_DB] (UserID, UserName, PassHash, Friends)  VALUES (@UserID, @UserName, @PassHash, @Friends)";
@@ -145,15 +149,15 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Create(IEnumerable<UsersDB> items)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandType = CommandType.TableDirect;
                 command.CommandText = "Users_DB";
 
-                using (var resultSet = command.ExecuteResultSet(ResultSetOptions.Updatable))
+                using (SqlCeResultSet resultSet = command.ExecuteResultSet(ResultSetOptions.Updatable))
                 {
-                    var record = resultSet.CreateRecord();
-                    foreach (var item in items)
+                    SqlCeUpdatableRecord record = resultSet.CreateRecord();
+                    foreach (UsersDB item in items)
                     {
                         record.SetValue(1, item.UserName);
                         record.SetValue(2, item.PassHash);
@@ -172,7 +176,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Delete(UsersDB item)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE UserID = @UserID";
 
@@ -190,13 +194,13 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Delete(IEnumerable<UsersDB> items)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE UserID = @UserID";
                 command.Parameters.Add("@UserID", SqlDbType.Int);
                 command.Prepare();
 
-                foreach (var item in items)
+                foreach (UsersDB item in items)
                 {
                     command.Parameters["@UserID"].Value = item.UserId != null ? (object)item.UserId : DBNull.Value;
 
@@ -216,7 +220,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public int DeleteByFriends(byte[] friends)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE Friends=@Friends";
                 command.Parameters.Add("@Friends", SqlDbType.Image);
@@ -237,7 +241,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public int DeleteByPassHash(string passHash)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE PassHash=@PassHash";
                 command.Parameters.Add("@PassHash", SqlDbType.NVarChar);
@@ -258,7 +262,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public int DeleteByUserId(int? userId)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE UserID=@UserID";
                 command.Parameters.Add("@UserID", SqlDbType.Int);
@@ -279,7 +283,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public int DeleteByUserName(string userName)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE UserName=@UserName";
                 command.Parameters.Add("@UserName", SqlDbType.NVarChar);
@@ -290,14 +294,14 @@ namespace CIS499_IM_Server.DatabaseClasses
         }
 
         /// <summary>
-        /// Purges the contents of the table
+        ///     Purges the contents of the table
         /// </summary>
         /// <returns>
-        /// The <see cref="int"/>.
+        ///     The <see cref="int" />.
         /// </returns>
         public int Purge()
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB]";
                 return command.ExecuteNonQuery();
@@ -311,7 +315,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// Friends value
         /// </param>
         /// <returns>
-        /// The <see>
+        /// The
+        ///     <see>
         ///         <cref>List</cref>
         ///     </see>
         ///     .
@@ -319,7 +324,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByFriends(byte[] friends)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (friends != null)
                 {
@@ -332,15 +337,15 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT * FROM Users_DB WHERE Friends IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
                                                reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
@@ -362,7 +367,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// Number of records to be retrieved
         /// </param>
         /// <returns>
-        /// The <see>
+        /// The
+        ///     <see>
         ///         <cref>List</cref>
         ///     </see>
         ///     .
@@ -370,7 +376,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByFriends(byte[] friends, int count)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (friends != null)
                 {
@@ -383,16 +389,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT TOP(" + count + ") * FROM Users_DB WHERE Friends IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -418,7 +425,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByPassHash(string passHash)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (passHash != null)
                 {
@@ -431,16 +438,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT * FROM Users_DB WHERE PassHash IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -460,7 +468,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// Number of records to be retrieved
         /// </param>
         /// <returns>
-        /// The <see>
+        /// The
+        ///     <see>
         ///         <cref>List</cref>
         ///     </see>
         ///     .
@@ -468,7 +477,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByPassHash(string passHash, int count)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (passHash != null)
                 {
@@ -481,16 +490,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT TOP(" + count + ") * FROM Users_DB WHERE PassHash IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -516,7 +526,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByUserID(int? userID)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (userID != null)
                 {
@@ -529,7 +539,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT * FROM Users_DB WHERE UserID IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -538,7 +548,8 @@ namespace CIS499_IM_Server.DatabaseClasses
                                            UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -563,7 +574,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         /// <exception cref="NotImplementedException">
         /// </exception>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1627:DocumentationTextMustNotBeEmpty", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1627:DocumentationTextMustNotBeEmpty", 
+            Justification = "Reviewed. Suppression is OK here.")]
         public List<UsersDB> SelectByUserId(int userId)
         {
             throw new NotImplementedException();
@@ -587,7 +599,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         /// <exception cref="NotImplementedException">
         /// </exception>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1627:DocumentationTextMustNotBeEmpty", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1627:DocumentationTextMustNotBeEmpty", 
+            Justification = "Reviewed. Suppression is OK here.")]
         public List<UsersDB> SelectByUserId(int userId, int count)
         {
             throw new NotImplementedException();
@@ -603,7 +616,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// Number of records to be retrieved
         /// </param>
         /// <returns>
-        /// The <see>
+        /// The
+        ///     <see>
         ///         <cref>List</cref>
         ///     </see>
         ///     .
@@ -611,7 +625,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByUserId(int? userID, int count)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (userID != null)
                 {
@@ -624,16 +638,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT TOP(" + count + ") * FROM Users_DB WHERE UserID IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -659,7 +674,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByUserName(string userName)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (userName != null)
                 {
@@ -672,16 +687,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT * FROM Users_DB WHERE UserName IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -701,7 +717,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// Number of records to be retrieved
         /// </param>
         /// <returns>
-        /// The <see>
+        /// The
+        ///     <see>
         ///         <cref>List</cref>
         ///     </see>
         ///     .
@@ -709,7 +726,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> SelectByUserName(string userName, int count)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (userName != null)
                 {
@@ -722,16 +739,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT TOP(" + count + ") * FROM Users_DB WHERE UserName IS NULL";
                 }
 
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]),
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string,
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -745,14 +763,15 @@ namespace CIS499_IM_Server.DatabaseClasses
         ///     The to array.
         /// </summary>
         /// <returns>
-        ///     The <see>
-        ///             <cref>UsersDB[]</cref>
-        ///         </see>
+        ///     The
+        ///     <see>
+        ///         <cref>UsersDB[]</cref>
+        ///     </see>
         ///     .
         /// </returns>
         public UsersDB[] ToArray()
         {
-            var list = this.ToList();
+            List<UsersDB> list = this.ToList();
             return list != null ? list.ToArray() : null;
         }
 
@@ -771,7 +790,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public UsersDB[] ToArray(int count)
         {
-            var list = this.ToList(count);
+            List<UsersDB> list = this.ToList(count);
             return list != null ? list.ToArray() : null;
         }
 
@@ -788,10 +807,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> ToList()
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "SELECT * FROM Users_DB";
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -799,8 +818,9 @@ namespace CIS499_IM_Server.DatabaseClasses
                                        {
                                            UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -826,10 +846,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         public List<UsersDB> ToList(int count)
         {
             var list = new List<UsersDB>();
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = string.Format("SELECT TOP({0}) * FROM Users_DB", count);
-                using (var reader = command.ExecuteReader())
+                using (SqlCeDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -837,8 +857,9 @@ namespace CIS499_IM_Server.DatabaseClasses
                                        {
                                            UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string,
-                                           Friends = reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
+                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
+                                           Friends =
+                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
                                        };
                         list.Add(item);
                     }
@@ -856,7 +877,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Update(UsersDB item)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText =
                     "UPDATE [Users_DB] SET UserName = @UserName, PassHash = @PassHash, Friends = @Friends WHERE UserID = @UserID";
@@ -881,7 +902,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Update(IEnumerable<UsersDB> items)
         {
-            using (var command = EntityBase.CreateCommand(this.Transaction))
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText =
                     "UPDATE [Users_DB] SET UserName = @UserName, PassHash = @PassHash, Friends = @Friends WHERE UserID = @UserID";
@@ -891,7 +912,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                 command.Parameters.Add("@Friends", SqlDbType.Image);
                 command.Prepare();
 
-                foreach (var item in items)
+                foreach (UsersDB item in items)
                 {
                     command.Parameters["@UserID"].Value = item.UserId != null ? (object)item.UserId : DBNull.Value;
                     command.Parameters["@UserName"].Value = item.UserName != null ? (object)item.UserName : DBNull.Value;

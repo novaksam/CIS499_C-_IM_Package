@@ -10,6 +10,7 @@
 namespace CIS499_IM_Server
 {
     using System;
+    using System.Data;
     using System.Data.SqlServerCe;
     using System.IO;
     using UserClass;
@@ -81,6 +82,37 @@ namespace CIS499_IM_Server
             usersDB.Dispose();
             connection.Dispose();
             connection.Close();
+        }
+
+        private bool CreateUser(UserClass user)
+        {
+            var connection = new SqlCeConnection(this.path);
+            try
+            {
+                var eng = new SqlCeEngine(this.path);
+                var cleanup = new System.Threading.Tasks.Task(eng.Dispose);
+                eng.CreateDatabase();
+                cleanup.Start();
+            }
+            catch (Exception e)
+            {
+                EventLogging.WriteError(e);
+            }
+            connection.Open();
+
+            var taco = new SqlCeDataAdapter();
+            var userIdParam = new SqlCeParameter("userId", SqlDbType.Int, 60000, "UserID") { Value = user.UserId };
+            var userNameParam = new SqlCeParameter("userName", SqlDbType.NVarChar, 128, "UserName") { Value = user.UserName };
+            var passHashParam = new SqlCeParameter("passHash", SqlDbType.NVarChar, 128, "PassHash") { Value = user.PasswordHash };
+            var friendsParam = new SqlCeParameter("friends", SqlDbType.VarBinary, 5000, "Friends") { Value = user.Friends };
+            var dbCommand = new SqlCeCommand();
+            dbCommand.Connection = connection;
+            dbCommand.Parameters.Add(userNameParam);
+            taco.InsertCommand.Parameters.Add(userNameParam);
+            taco.InsertCommand.Parameters.Add(passHashParam);
+            taco.InsertCommand.Parameters.Add(friendsParam);
+            taco.InsertCommand.Parameters.Add("UserName", SqlDbType.NVarChar, 128);
+            return false;
         }
     }
 }

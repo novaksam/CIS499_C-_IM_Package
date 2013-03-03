@@ -5,89 +5,119 @@
 // <summary>
 //   Main Data Repository implementation containing all default table repositories implementations
 // </summary>
-// 
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace CIS499_IM_Server.DatabaseClasses
 {
+    using System;
     using System.Data.SqlServerCe;
 
     /// <summary>
-	/// Main Data Repository implementation containing all default table repositories implementations
-	/// </summary>
-	public class DataRepository : IDataRepository
-	{
+    ///     Main Data Repository implementation containing all default table repositories implementations
+    /// </summary>
+    public class DataRepository : IDataRepository
+    {
+        #region Fields
+
         /// <summary>
-        /// The transaction.
+        ///     The disposed.
+        /// </summary>
+        private bool disposed;
+
+        /// <summary>
+        ///     The transaction.
         /// </summary>
         private SqlCeTransaction transaction;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DataRepository"/> class. 
-		/// Creates an instance of DataRepository
-		/// </summary>
-		public DataRepository()
-		{
-			this.UsersDB = new UsersDBRepository();
-		}
+        #endregion
 
-		/// <summary>
-		/// Gets an instance of the IUsers_DBRepository
-		/// </summary>
-		public IUsersDBRepository UsersDB { get; private set; }
+        #region Constructors and Destructors
 
-		/// <summary>
-		/// Starts a Transaction using the Connection instance
-		/// </summary>
-		/// <returns>
-		/// The <see cref="SqlCeTransaction"/>.
-		/// </returns>
-		public SqlCeTransaction BeginTransaction()
-		{
-		    if (this.transaction != null)
-		    {
-		        throw new System.InvalidOperationException(
-		            "A transaction has already been started. Only one transaction is allowed");
-		    }
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DataRepository" /> class.
+        ///     Creates an instance of DataRepository
+        /// </summary>
+        public DataRepository()
+        {
+            this.UsersDB = new UsersDBRepository();
+        }
 
-		    this.transaction = EntityBase.Connection.BeginTransaction();
-		    this.UsersDB.Transaction = this.transaction;
-			return this.transaction;
-		}
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="DataRepository" /> class.
+        /// </summary>
+        ~DataRepository()
+        {
+            this.Dispose(false);
+        }
 
-		/// <summary>
-		/// Commits the transaction
-		/// </summary>
-		public void Commit()
-		{
-		    if (this.transaction == null)
-		    {
-		        throw new System.InvalidOperationException("No transaction has been started");
-		    }
+        #endregion
 
-		    this.transaction.Commit();
-		}
+        #region Public Properties
 
-		/// <summary>
-		/// Rollbacks the transaction
-		/// </summary>
-		public void Rollback()
-		{
-		    if (this.transaction == null)
-		    {
-		        throw new System.InvalidOperationException("No transaction has been started");
-		    }
+        /// <summary>
+        ///     Gets an instance of the IUsers_DBRepository
+        /// </summary>
+        public IUsersDBRepository UsersDB { get; private set; }
 
-		    this.transaction.Rollback();
-		}
+        #endregion
 
-		/// <summary>
-		/// Releases the resources used. All uncommitted transactions are rolled back
-		/// </summary>
-		public void Dispose()
-		{
-			this.Dispose(true);
-		}
+        #region Public Methods and Operators
+
+        /// <summary>
+        ///     Starts a Transaction using the Connection instance
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="SqlCeTransaction" />.
+        /// </returns>
+        public SqlCeTransaction BeginTransaction()
+        {
+            if (this.transaction != null)
+            {
+                throw new InvalidOperationException(
+                    "A transaction has already been started. Only one transaction is allowed");
+            }
+
+            this.transaction = EntityBase.Connection.BeginTransaction();
+            this.UsersDB.Transaction = this.transaction;
+            return this.transaction;
+        }
+
+        /// <summary>
+        ///     Commits the transaction
+        /// </summary>
+        public void Commit()
+        {
+            if (this.transaction == null)
+            {
+                throw new InvalidOperationException("No transaction has been started");
+            }
+
+            this.transaction.Commit();
+        }
+
+        /// <summary>
+        ///     Releases the resources used. All uncommitted transactions are rolled back
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        /// <summary>
+        ///     Rollbacks the transaction
+        /// </summary>
+        public void Rollback()
+        {
+            if (this.transaction == null)
+            {
+                throw new InvalidOperationException("No transaction has been started");
+            }
+
+            this.transaction.Rollback();
+        }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// The dispose.
@@ -104,27 +134,16 @@ namespace CIS499_IM_Server.DatabaseClasses
 
             if (disposing)
             {
-				if (this.transaction != null)
-				{
-					this.transaction.Dispose();
-					this.transaction = null;
-				}
-			}
+                if (this.transaction != null)
+                {
+                    this.transaction.Dispose();
+                    this.transaction = null;
+                }
+            }
 
-			this.disposed = true;
-		}
+            this.disposed = true;
+        }
 
-        /// <summary>
-        /// The disposed.
-        /// </summary>
-        private bool disposed;
-
-        /// <summary>
-        /// Finalizes an instance of the <see cref="DataRepository"/> class. 
-        /// </summary>
-        ~DataRepository()
-		{
-			this.Dispose(false);
-		}
-	}
+        #endregion
+    }
 }

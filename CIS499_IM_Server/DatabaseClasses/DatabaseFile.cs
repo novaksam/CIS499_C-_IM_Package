@@ -5,41 +5,46 @@
 // <summary>
 //   Helper class for generating the database file in runtime
 // </summary>
-// 
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace CIS499_IM_Server.DatabaseClasses
 {
+    using System.Data.SqlServerCe;
+
     /// <summary>
-	/// Helper class for generating the database file in runtime
-	/// </summary>
-	public static class DatabaseFile
-	{
-		/// <summary>
-		/// Creates the database
-		/// </summary>
-		/// <returns>
-		/// The <see cref="int"/>.
-		/// </returns>
-		public static int CreateDatabase()
-		{
-			var resultCount = 0;
+    ///     Helper class for generating the database file in runtime
+    /// </summary>
+    public static class DatabaseFile
+    {
+        #region Public Methods and Operators
 
-		    using (var engine = new System.Data.SqlServerCe.SqlCeEngine(EntityBase.ConnectionString))
-		    {
-		        engine.CreateDatabase();
-		    }
+        /// <summary>
+        ///     Creates the database
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="int" />.
+        /// </returns>
+        public static int CreateDatabase()
+        {
+            int resultCount = 0;
 
-		    using (var transaction = EntityBase.Connection.BeginTransaction())
-			using (var command = EntityBase.CreateCommand(transaction))
-			{
-				command.CommandText = "CREATE TABLE [Users_DB](UserID INT IDENTITY(100,1) PRIMARY KEY NOT NULL, UserName NVARCHAR(128) NOT NULL, PassHash NVARCHAR(128) NOT NULL, Friends VARBINARY)";
-				resultCount += command.ExecuteNonQuery();
+            using (var engine = new SqlCeEngine(EntityBase.ConnectionString))
+            {
+                engine.CreateDatabase();
+            }
 
-				transaction.Commit();
-			}
+            using (SqlCeTransaction transaction = EntityBase.Connection.BeginTransaction())
+            using (SqlCeCommand command = EntityBase.CreateCommand(transaction))
+            {
+                command.CommandText =
+                    "CREATE TABLE [Users_DB](UserID INT IDENTITY(100,1) PRIMARY KEY NOT NULL, UserName NVARCHAR(128) NOT NULL, PassHash NVARCHAR(128) NOT NULL, Friends VARBINARY)";
+                resultCount += command.ExecuteNonQuery();
 
-			return resultCount;
-		}
-	}
+                transaction.Commit();
+            }
+
+            return resultCount;
+        }
+
+        #endregion
+    }
 }

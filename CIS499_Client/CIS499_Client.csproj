@@ -107,7 +107,6 @@
     </Compile>
     <Compile Include="eventLogging.cs" />
     <Compile Include="IMstatuses.cs" />
-    <Compile Include="Packet.cs" />
     <Compile Include="RegisterWindow.xaml.cs">
       <DependentUpon>RegisterWindow.xaml</DependentUpon>
     </Compile>
@@ -215,6 +214,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Packet\Packet.csproj">
+      <Project>{BF81A1F7-0BF8-460C-A6F9-BAF209F39779}</Project>
+      <Name>Packet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UserClass\UserClass.csproj">
       <Project>{A8A43E77-2EAA-443F-BF95-9985FC289D34}</Project>
       <Name>UserClass</Name>
