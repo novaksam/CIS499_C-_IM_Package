@@ -1,7 +1,7 @@
 CIS397_IM_Package/bin*
 CIS397_IM_Package/obj*
 
-CIS499_IM_Server/server.pfx
+#CIS499_IM_Server/server.pfx
 CIS499_IM_Server/bin*
 CIS499_IM_Server/obj*
 
@@ -10,6 +10,9 @@ CIS499_Client/obj*
 
 Userclass/bin*
 Userclass/obj*
+
+Packet/bin*
+Packet/obj*
 
 packages/*/
 *.cache
