@@ -16,6 +16,9 @@ namespace CIS499_Client
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading;
+
+    using Imstatuses;
+
     using UserClass;
     using Packet;
 
@@ -113,10 +116,10 @@ namespace CIS499_Client
 
             // Get the hello from the server
             var hello = reader.ReadInt32();
-            if (hello == ImStatuses.IM_Hello)
+            if (hello == ImStatuses.ImHello)
             {
                 // Send a hello to the server
-                this.writer.Write(ImStatuses.IM_Hello);
+                this.writer.Write(ImStatuses.ImHello);
 
                 // var threadStart = new ParameterizedThreadStart(o => this.Listen(user));
                 // var listenMeth = new Thread(threadStart);
@@ -135,7 +138,7 @@ namespace CIS499_Client
         /// </returns>
         internal bool Login(UserClass user)
         {
-            this.writer.Write(ImStatuses.IM_Login);
+            this.writer.Write(ImStatuses.ImLogin);
             var serial = UserClass.Serialize(user);
             this.writer.Write(serial.Length);
             this.writer.Write(serial);
@@ -144,7 +147,7 @@ namespace CIS499_Client
             // writer.Write(user.PasswordHash);
 
             var temp = this.reader.ReadByte();
-            if (temp == ImStatuses.IM_OK)
+            if (temp == ImStatuses.ImOk)
             {
                 // Get the length of the incoming byte array
                 int length = this.reader.ReadInt32();
@@ -158,13 +161,13 @@ namespace CIS499_Client
                 return true;
             }
             
-            if (temp == ImStatuses.IM_WrongPass)
+            if (temp == ImStatuses.ImWrongPass)
             {
                 this.wrongPasswordException.Source = "User login";
                 throw this.wrongPasswordException;
             }
 
-            if (temp == ImStatuses.IM_NoExists)
+            if (temp == ImStatuses.ImNoExists)
             {
                 this.noUserException.Source = "User login";
                 throw this.noUserException;
@@ -184,14 +187,14 @@ namespace CIS499_Client
         /// </returns>
         internal bool Register(UserClass user)
         {
-            this.writer.Write(ImStatuses.IM_Register);
+            this.writer.Write(ImStatuses.ImRegister);
             var serial = UserClass.Serialize(user);
             this.writer.Write(serial.Length);
             this.writer.Write(serial);
             this.writer.Flush();
 
             var temp = this.reader.ReadByte();
-            if (temp == ImStatuses.IM_OK)
+            if (temp == ImStatuses.ImOk)
             {
                 return true;
             }
@@ -220,11 +223,11 @@ namespace CIS499_Client
                 // Read the incoming status
                 var type = this.reader.ReadByte();
 
-                if (type == ImStatuses.IM_IsAvailable)
+                if (type == ImStatuses.ImIsAvailable)
                 {
                     var who = this.reader.ReadString();
 
-                    this.writer.Write(ImStatuses.IM_IsAvailable);
+                    this.writer.Write(ImStatuses.ImIsAvailable);
                     this.writer.Write(user.UserId);
                     this.writer.Flush();
                 }
@@ -292,7 +295,7 @@ namespace CIS499_Client
         /// </param>
         internal void SendMessage(Packet packet)
         {
-            this.writer.Write(ImStatuses.IM_Send);
+            this.writer.Write(ImStatuses.ImSend);
             this.writer.Write(packet.Message);
             this.writer.Flush();
         }

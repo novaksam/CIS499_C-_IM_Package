@@ -89,11 +89,13 @@ namespace CIS499_IM_Server.DatabaseClasses
 
                 command.Parameters.Add("@UserName", SqlDbType.NVarChar);
                 //command.Parameters["@UserName"].Value = userName != null ? (object)userName : DBNull.Value;
+                command.Parameters["@UserName"].Value = userName;
                 command.Parameters.Add("@PassHash", SqlDbType.NVarChar);
                 //command.Parameters["@PassHash"].Value = passHash != null ? (object)passHash : DBNull.Value;
+                command.Parameters["@PassHash"].Value = passHash;
                 command.Parameters.Add("@Friends", SqlDbType.VarBinary);
-                command.Parameters["@Friends"].Value = UserClass.StoreFriends(friends);
                 // command.Parameters["@Friends"].Value = friends != null ? (object)UserClass.StoreFriends(friends) : DBNull.Value;
+                command.Parameters["@Friends"].Value = UserClass.StoreFriends(friends);
                 var tim = command.ExecuteNonQuery();
             }
         }

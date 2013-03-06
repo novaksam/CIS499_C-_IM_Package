@@ -106,7 +106,6 @@
       <DependentUpon>ChatWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="eventLogging.cs" />
-    <Compile Include="IMstatuses.cs" />
     <Compile Include="RegisterWindow.xaml.cs">
       <DependentUpon>RegisterWindow.xaml</DependentUpon>
     </Compile>
@@ -214,6 +213,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Imstatuses\Imstatuses.csproj">
+      <Project>{85C9B672-4C95-4475-AEB4-916540F4BECF}</Project>
+      <Name>Imstatuses</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Packet\Packet.csproj">
       <Project>{BF81A1F7-0BF8-460C-A6F9-BAF209F39779}</Project>
       <Name>Packet</Name>

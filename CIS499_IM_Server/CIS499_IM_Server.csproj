@@ -96,9 +96,7 @@
     <Compile Include="DatabaseClasses\IUsersDBRepository.cs" />
     <Compile Include="DatabaseClasses\UsersDB.cs" />
     <Compile Include="DatabaseClasses\UsersDBRepository.cs" />
-    <Compile Include="DBInteract.cs" />
     <Compile Include="eventLogging.cs" />
-    <Compile Include="IMstatuses.cs" />
     <Compile Include="Main_Class.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -156,6 +154,10 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Imstatuses\Imstatuses.csproj">
+      <Project>{85C9B672-4C95-4475-AEB4-916540F4BECF}</Project>
+      <Name>Imstatuses</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Packet\Packet.csproj">
       <Project>{BF81A1F7-0BF8-460C-A6F9-BAF209F39779}</Project>
       <Name>Packet</Name>

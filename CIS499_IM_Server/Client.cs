@@ -23,6 +23,8 @@ namespace CIS499_IM_Server
 
     using CIS499_IM_Server.DatabaseClasses;
 
+    using Imstatuses;
+
     using UserClass;
 
     /// <summary>
@@ -133,10 +135,10 @@ namespace CIS499_IM_Server
                 this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
 
                 // Say "hello".
-                this.writer.Write(ImStatuses.IM_Hello);
+                this.writer.Write(ImStatuses.ImHello);
                 this.writer.Flush();
                 var hello = this.reader.ReadInt32();
-                if (hello == ImStatuses.IM_Hello)
+                if (hello == ImStatuses.ImHello)
                 {
                     // Writer.Write(ImStatuses.IM_Login);
                     // Writer.Flush();
@@ -148,7 +150,7 @@ namespace CIS499_IM_Server
 
                     switch (action)
                     {
-                        case ImStatuses.IM_Login:
+                        case ImStatuses.ImLogin:
                             // Get the length of the incoming byte array
                             length = this.reader.ReadInt32();
 
@@ -164,7 +166,7 @@ namespace CIS499_IM_Server
 
                                 if (list.Count < 1)
                                 {
-                                    this.writer.Write(ImStatuses.IM_NoExists);
+                                    this.writer.Write(ImStatuses.ImNoExists);
                                     this.writer.Flush();
                                     break;
                                 }
@@ -173,7 +175,7 @@ namespace CIS499_IM_Server
                                 if (user.PasswordHash == temp.PasswordHash)
                                 {
                                     // User logged in so return their account to them
-                                    this.writer.Write(ImStatuses.IM_IsAvailable);
+                                    this.writer.Write(ImStatuses.ImIsAvailable);
                                     var logg = UserClass.Serialize(temp);
                                     this.writer.Write(logg.Length);
                                     this.writer.Write(logg);
@@ -194,14 +196,14 @@ namespace CIS499_IM_Server
                                 }
                                 else
                                 {
-                                    this.writer.Write(ImStatuses.IM_WrongPass);
+                                    this.writer.Write(ImStatuses.ImWrongPass);
                                     this.writer.Flush();
                                     // this.CloseConn();
                                 }
                             }
 
                             break;
-                        case ImStatuses.IM_Register:
+                        case ImStatuses.ImRegister:
                             // Get the length of the incoming byte array
                             length = this.reader.ReadInt32();
 
@@ -219,12 +221,12 @@ namespace CIS499_IM_Server
                                     temp.PassHash = user.PasswordHash;
                                     temp.Friends = user.Friends;
                                     this.Prog.dbRepository.Create(temp);
-                                    this.writer.Write(ImStatuses.IM_OK);
+                                    this.writer.Write(ImStatuses.ImOk);
                                     this.writer.Flush();
                                 }
                                 else
                                 {
-                                    this.writer.Write(ImStatuses.IM_Exists);
+                                    this.writer.Write(ImStatuses.ImExists);
                                     this.writer.Flush();
                                     // this.CloseConn();
                                 }
@@ -293,11 +295,11 @@ namespace CIS499_IM_Server
 
                     switch (type)
                     {
-                        case ImStatuses.IM_IsAvailable:
+                        case ImStatuses.ImIsAvailable:
                             {
                                 string who = this.reader.ReadString();
 
-                                this.writer.Write(ImStatuses.IM_IsAvailable);
+                                this.writer.Write(ImStatuses.ImIsAvailable);
                                 this.writer.Write(who);
 
                                 UserInfo info;
@@ -320,7 +322,7 @@ namespace CIS499_IM_Server
                                 this.writer.Flush();
                             }
                             break;
-                        case ImStatuses.IM_Send:
+                        case ImStatuses.ImSend:
                             {
                                 var to = this.reader.ReadString();
                                 var msg = this.reader.ReadString();
@@ -351,18 +353,5 @@ namespace CIS499_IM_Server
             this.userInfo.LoggedIn = false;
             Console.WriteLine("[{0}] ({1}) User logged out", DateTime.Now, this.userInfo.UserName);
         }
-
-        // public const int IM_Hello = 2012;      // Hello
-        // public const byte IM_OK = 0;           // OK
-        // public const byte IM_Login = 1;        // Login
-        // public const byte IM_Register = 2;     // Register
-        // public const byte IM_TooUsername = 3;  // Too long username
-        // public const byte IM_TooPassword = 4;  // Too long password
-        // public const byte IM_Exists = 5;       // Already exists
-        // public const byte IM_NoExists = 6;     // Doesn't exists
-        // public const byte IM_WrongPass = 7;    // Wrong password
-        // public const byte IM_IsAvailable = 8;  // Is user available?
-        // public const byte IM_Send = 9;         // Send message
-        // public const byte IM_Received = 10;    // Message received
     }
 }
