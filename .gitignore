@@ -14,5 +14,8 @@ Userclass/obj*
 Packet/bin*
 Packet/obj*
 
+Imstatuses/bin*
+Imstatuses/obj*
+
 packages/*/
 *.cache
