@@ -19,7 +19,7 @@ namespace UserClass
     /// The user class.
     /// </summary>
     [Serializable]
-    public class UserClass : IDisposable
+    public class UserClass : IDisposable, ICloneable
     {
         /// <summary>
         /// Gets the user name.
@@ -110,6 +110,17 @@ namespace UserClass
         }
 
         /// <summary>
+        /// The clone.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="object"/>.
+        /// </returns>
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+        /// <summary>
         /// The dispose.
         /// </summary>
         public void Dispose()
@@ -153,9 +164,51 @@ namespace UserClass
             var binForm = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
             memStream.Write(bytes, 0, bytes.Length);
             memStream.Seek(0, SeekOrigin.Begin);
-            var obj = (UserClass)binForm.Deserialize(memStream);
+            var obj = binForm.Deserialize(memStream) as UserClass;
             memStream.Dispose();
             return obj;
+        }
+
+        /// <summary>
+        /// Convert stored list of friends into a list of users
+        /// </summary>
+        /// <param name="bytes">
+        /// The stored byte array
+        /// </param>
+        /// <returns>
+        /// Friends list
+        /// </returns>
+        public static List<UserClass> RestoreFriends(byte[] bytes)
+        {
+            var memStream = new MemoryStream();
+            var binForm = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
+            memStream.Write(bytes, 0, bytes.Length);
+            memStream.Seek(0, SeekOrigin.Begin);
+            var obj = binForm.Deserialize(memStream) as List<UserClass>;
+            memStream.Dispose();
+            return obj;
+        }
+
+        /// <summary>
+        /// Convert list of friends into storable object
+        /// </summary>
+        /// <param name="obj">
+        /// The list of store
+        /// </param>
+        /// <returns>
+        /// The byte array
+        /// </returns>
+        public static byte[] StoreFriends(List<UserClass> obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            var bf = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
+            var ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
         }
     }
 }

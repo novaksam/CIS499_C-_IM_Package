@@ -16,6 +16,7 @@ namespace CIS499_IM_Server.DatabaseClasses
     /// <summary>
     ///     Represents the Users_DB table
     /// </summary>
+    [Serializable]
     public class UsersDB : UserClass
     {
         #region Constants

@@ -55,6 +55,20 @@ namespace CIS499_IM_Server
         }
 
         /// <summary>
+        /// For logging exceptions during run time
+        /// </summary>
+        /// <param name="ex">
+        /// The exception to be logged
+        /// </param>
+        /// <param name="info">
+        /// Additional info.
+        /// </param>
+        internal static void WriteError(Exception ex, string info)
+        {
+            EventLog.WriteEntry(EventSource, info + " " + ex.Message, EventLogEntryType.Error, 1144);
+        }
+
+        /// <summary>
         /// Creates the event log source for the service.
         /// Only ran during startup of the service.
         /// </summary>

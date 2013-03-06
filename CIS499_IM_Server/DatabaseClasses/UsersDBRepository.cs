@@ -85,15 +85,16 @@ namespace CIS499_IM_Server.DatabaseClasses
             using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText =
-                    "INSERT INTO [Users_DB] (UserName, PassHash, Friends)  VALUES (@UserName, @PassHash, @Friends)";
+                    "INSERT INTO Users_DB (UserName, PassHash, Friends)  VALUES (@UserName, @PassHash, @Friends)";
 
                 command.Parameters.Add("@UserName", SqlDbType.NVarChar);
-                command.Parameters["@UserName"].Value = userName != null ? (object)userName : DBNull.Value;
+                //command.Parameters["@UserName"].Value = userName != null ? (object)userName : DBNull.Value;
                 command.Parameters.Add("@PassHash", SqlDbType.NVarChar);
-                command.Parameters["@PassHash"].Value = passHash != null ? (object)passHash : DBNull.Value;
-                command.Parameters.Add("@Friends", SqlDbType.Image);
-                command.Parameters["@Friends"].Value = friends != null ? (object)friends : DBNull.Value;
-                command.ExecuteNonQuery();
+                //command.Parameters["@PassHash"].Value = passHash != null ? (object)passHash : DBNull.Value;
+                command.Parameters.Add("@Friends", SqlDbType.VarBinary);
+                command.Parameters["@Friends"].Value = UserClass.StoreFriends(friends);
+                // command.Parameters["@Friends"].Value = friends != null ? (object)UserClass.StoreFriends(friends) : DBNull.Value;
+                var tim = command.ExecuteNonQuery();
             }
         }
 

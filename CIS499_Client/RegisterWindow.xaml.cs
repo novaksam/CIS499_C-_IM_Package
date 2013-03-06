@@ -12,6 +12,8 @@ namespace CIS499_Client
     using System.Diagnostics.CodeAnalysis;
     using System.Windows;
 
+    using UserClass;
+
     /// <summary>
     /// Interaction logic for RegisterWindow.xaml
     /// </summary>
@@ -26,6 +28,13 @@ namespace CIS499_Client
         public RegisterWindow()
         {
             InitializeComponent();
+        }
+
+        private void btnReg_Click(object sender, RoutedEventArgs e)
+        {
+            UserClass user = new UserClass(txtUsername.Text, txtPassword.Password, false);
+            Networking net = new Networking(user);
+            net.Register(user);
         }
     }
 }

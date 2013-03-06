@@ -8,6 +8,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 namespace CIS499_IM_Server.DatabaseClasses
 {
+    using System.Configuration;
     using System.Data;
     using System.Data.SqlServerCe;
 
@@ -37,7 +38,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </summary>
         static EntityBase()
         {
-            ConnectionString = "Data Source='Users.sdf'";
+            ConnectionString = "Data Source='" 
+                + ConfigurationSettings.AppSettings["DB_File"] + "';Password=" 
+                + ConfigurationSettings.AppSettings["DB_Pass"]
+                               + ";Persist Security Info=True";
         }
 
         #endregion

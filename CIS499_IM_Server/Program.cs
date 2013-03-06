@@ -61,7 +61,7 @@ namespace CIS499_IM_Server
         ///     Users dictionary.
         ///     String of the IP address and the userID
         /// </summary>
-        public Dictionary<IPAddress, int> UserConnections = new Dictionary<IPAddress, int>();
+        public Dictionary<int, TcpClient> UserConnections = new Dictionary<int, TcpClient>();
 
         /// <summary>
         ///     Certificate for encryption
@@ -81,7 +81,7 @@ namespace CIS499_IM_Server
         /// <summary>
         ///     The database repository.
         /// </summary>
-        private UsersDBRepository dbRepository = new UsersDBRepository();
+        internal UsersDBRepository dbRepository = new UsersDBRepository();
 
         /// <summary>
         ///     The lock token.
@@ -151,12 +151,15 @@ namespace CIS499_IM_Server
         public void LoadUsers()
         {
             // Load users data
-            Monitor.TryEnter(this.dbRepository, -1, ref this.lockToken);
+            //Monitor.TryEnter(this.dbRepository, -1, ref this.lockToken);
             try
             {
-                lock (this.UserList)
+                lock (this.dbRepository)
                 {
-                    this.UserList = new List<UserClass>(this.dbRepository.ToList());
+                    lock (this.UserList)
+                    {
+                        this.UserList = new List<UserClass>(this.dbRepository.ToList());
+                    }
                 }
             }
             catch (Exception exception)
@@ -165,8 +168,8 @@ namespace CIS499_IM_Server
             }
             finally
             {
-                Monitor.Exit(this.dbRepository);
-                Monitor.Pulse(this.dbRepository);
+                //Monitor.Exit(this.dbRepository);
+                //Monitor.Pulse(this.dbRepository);
             }
 
             // try

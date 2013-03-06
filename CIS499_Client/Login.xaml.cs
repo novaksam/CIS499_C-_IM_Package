@@ -46,5 +46,13 @@
             Options options = new Options();
             options.ShowDialog();
         }
+
+        private void BtnReg_Click(object sender, RoutedEventArgs e)
+        {
+            RegisterWindow register = new RegisterWindow();
+            register.Show();
+            this.Hide();
+
+        }
     }
 }

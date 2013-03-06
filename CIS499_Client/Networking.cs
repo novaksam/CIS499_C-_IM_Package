@@ -17,6 +17,7 @@ namespace CIS499_Client
     using System.Text;
     using System.Threading;
     using UserClass;
+    using Packet;
 
     /// <summary>
     /// The networking.
@@ -49,6 +50,11 @@ namespace CIS499_Client
         private Exception wrongPasswordException = new Exception("Password incorrect");
 
         /// <summary>
+        /// No user exception
+        /// </summary>
+        private Exception noUserException = new Exception("No user with that Username exists.");
+
+        /// <summary>
         /// The security stream.
         /// </summary>
         private SslStream ssl;
@@ -69,6 +75,16 @@ namespace CIS499_Client
         private Boolean loggedIn;
 
         /// <summary>
+        /// The network stream.
+        /// </summary>
+        private NetworkStream stream;
+
+        /// <summary>
+        /// The user
+        /// </summary>
+        private UserClass theUser;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Networking"/> class. 
         /// Default constructor
         /// </summary>
@@ -77,6 +93,7 @@ namespace CIS499_Client
         /// </param>
         public Networking(UserClass user)
         {
+            this.theUser = user.Clone() as UserClass;
             // Creates the connection
             this.tcpClient = new TcpClient(Settings.Default.Server, Settings.Default.Port);
 
@@ -88,8 +105,8 @@ namespace CIS499_Client
             this.loggedIn = true;
 
             // this.Ping(tcpClient);
-            NetworkStream stream = this.tcpClient.GetStream();
-            this.ssl = new SslStream(stream, false, ValidateCert);
+            this.stream = this.tcpClient.GetStream();
+            this.ssl = new SslStream(this.stream, false, ValidateCert);
             this.ssl.AuthenticateAsClient(Settings.Default.Cert_Owner);
             this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
             this.reader = new BinaryReader(this.ssl, Encoding.UTF8);
@@ -101,26 +118,9 @@ namespace CIS499_Client
                 // Send a hello to the server
                 this.writer.Write(ImStatuses.IM_Hello);
 
-                // var te = reader.ReadInt32();
-                // if (te == ImStatuses.IM_Login)
-                // {
-                var login = this.Login(user);
-
-                switch (login)
-                {
-                    // Proceed as normal
-                    case ImStatuses.IM_OK:
-                        break;
-
-                    // Wrong password
-                    case ImStatuses.IM_WrongPass:
-                        this.wrongPasswordException.Source = "User login";
-                        throw this.wrongPasswordException;
-                }
-
-                var threadStart = new ParameterizedThreadStart(o => this.Listen(user));
-                var listenMeth = new Thread(threadStart);
-                listenMeth.Start();
+                // var threadStart = new ParameterizedThreadStart(o => this.Listen(user));
+                // var listenMeth = new Thread(threadStart);
+                // listenMeth.Start();
             }
         }
 
@@ -131,20 +131,71 @@ namespace CIS499_Client
         /// The user.
         /// </param>
         /// <returns>
-        /// The <see cref="byte"/>.
+        /// The <see cref="ImStatuses"/>.
         /// </returns>
-        private byte Login(UserClass user)
+        internal bool Login(UserClass user)
         {
-
             this.writer.Write(ImStatuses.IM_Login);
             var serial = UserClass.Serialize(user);
-            this.writer.Write((int)serial.Length);
+            this.writer.Write(serial.Length);
+            this.writer.Write(serial);
+            this.writer.Flush();
+            
+            // writer.Write(user.PasswordHash);
+
+            var temp = this.reader.ReadByte();
+            if (temp == ImStatuses.IM_OK)
+            {
+                // Get the length of the incoming byte array
+                int length = this.reader.ReadInt32();
+
+                // Read said byte array
+                byte[] use = this.reader.ReadBytes(length);
+
+                // Convert that array into a user.
+                this.theUser = UserClass.Deserialize(use).Clone() as UserClass;
+
+                return true;
+            }
+            
+            if (temp == ImStatuses.IM_WrongPass)
+            {
+                this.wrongPasswordException.Source = "User login";
+                throw this.wrongPasswordException;
+            }
+
+            if (temp == ImStatuses.IM_NoExists)
+            {
+                this.noUserException.Source = "User login";
+                throw this.noUserException;
+            }
+            
+            return false;
+        }
+
+        /// <summary>
+        /// Register user
+        /// </summary>
+        /// <param name="user">
+        /// The user to remember
+        /// </param>
+        /// <returns>
+        /// Returns the result of the registration
+        /// </returns>
+        internal bool Register(UserClass user)
+        {
+            this.writer.Write(ImStatuses.IM_Register);
+            var serial = UserClass.Serialize(user);
+            this.writer.Write(serial.Length);
             this.writer.Write(serial);
             this.writer.Flush();
 
-            // writer.Write(user.PasswordHash);
-            return this.reader.ReadByte();
-
+            var temp = this.reader.ReadByte();
+            if (temp == ImStatuses.IM_OK)
+            {
+                return true;
+            }
+            return false;
         }
 
         // private void Ping(TcpClient client)
@@ -242,8 +293,6 @@ namespace CIS499_Client
         internal void SendMessage(Packet packet)
         {
             this.writer.Write(ImStatuses.IM_Send);
-            this.writer.Write(packet.SenderId);
-            this.writer.Write(packet.RecipientId);
             this.writer.Write(packet.Message);
             this.writer.Flush();
         }

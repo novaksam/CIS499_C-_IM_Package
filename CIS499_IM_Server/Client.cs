@@ -42,15 +42,12 @@ namespace CIS499_IM_Server
         /// <param name="db">
         /// reference to the database
         /// </param>
-        /// <param name="dictionary">
-        /// Dictionary for users
-        /// </param>
         public Client(Program p, TcpClient c, ref UsersDBRepository db)
         {
             this.thread = new Thread(this.SetupConn);
             this.Prog = p;
             this.client = c;
-            this.dbRepository = db;
+            // this.dbRepository = db;
         }
 
         /// <summary>
@@ -161,10 +158,18 @@ namespace CIS499_IM_Server
                             // Convert that array into a user.
                             user = UserClass.Deserialize(use);
 
-                            lock (this.dbRepository)
+                            lock (this.Prog.dbRepository)
                             {
-                                var temp = this.dbRepository.SelectByUserName(user.UserName)[0];
+                                var list = this.Prog.dbRepository.SelectByUserName(user.UserName);
 
+                                if (list.Count < 1)
+                                {
+                                    this.writer.Write(ImStatuses.IM_NoExists);
+                                    this.writer.Flush();
+                                    break;
+                                }
+
+                                var temp = list[0];
                                 if (user.PasswordHash == temp.PasswordHash)
                                 {
                                     // User logged in so return their account to them
@@ -172,31 +177,30 @@ namespace CIS499_IM_Server
                                     var logg = UserClass.Serialize(temp);
                                     this.writer.Write(logg.Length);
                                     this.writer.Write(logg);
+                                    this.writer.Flush();
+
+                                    // Add the connection to the database
                                     lock (this.Prog.UserConnections)
                                     {
-                                        if (temp.UserId != null)
-                                        {
-                                            this.Prog.UserConnections.Add(
-                                                ((IPEndPoint)this.client.Client.RemoteEndPoint).Address, 
-                                                (int)temp.UserId);
-                                        }
+                                        Debug.Assert(temp.UserId != null, "temp.UserId != null");
+                                        this.Prog.UserConnections.Add((int)temp.UserId, this.client);
                                     }
-
+                                    
+                                    // With the call going to the receiver the
+                                    // temp should still be in scope
+                                    // this.userInfo = temp.Clone() as UserInfo;
+                                    this.userInfo = temp as UserInfo;
                                     this.Receiver();
                                 }
                                 else
                                 {
                                     this.writer.Write(ImStatuses.IM_WrongPass);
+                                    this.writer.Flush();
+                                    // this.CloseConn();
                                 }
                             }
 
-
-                            // TODO call database to verify user
-                            // TODO call database to verify password
-                            // TODO return statement to user
-
                             break;
-
                         case ImStatuses.IM_Register:
                             // Get the length of the incoming byte array
                             length = this.reader.ReadInt32();
@@ -206,96 +210,37 @@ namespace CIS499_IM_Server
 
                             // Convert that array into a user.
                             user = UserClass.Deserialize(use);
-                            lock (this.dbRepository)
+                            lock (this.Prog.dbRepository)
                             {
-                                this.dbRepository.Create((UsersDB)user);
+                                if (this.Prog.dbRepository.SelectByUserName(user.UserName) == null)
+                                {
+                                    var temp = new UsersDB();
+                                    temp.UserName = user.UserName;
+                                    temp.PassHash = user.PasswordHash;
+                                    temp.Friends = user.Friends;
+                                    this.Prog.dbRepository.Create(temp);
+                                    this.writer.Write(ImStatuses.IM_OK);
+                                    this.writer.Flush();
+                                }
+                                else
+                                {
+                                    this.writer.Write(ImStatuses.IM_Exists);
+                                    this.writer.Flush();
+                                    // this.CloseConn();
+                                }
                             }
                             break;
-                        case ImStatuses.IM_Logout:
+                        default:
+                            this.CloseConn();
                             break;
-                    }
-                    // Hello packet is OK. Time to wait for login or register.
-                    if (action == ImStatuses.IM_Login)
-                    {
-
-                    }
-
-
-                    var logMode = this.reader.ReadByte();
-                    var userName = this.reader.ReadString();
-                    var password = this.reader.ReadString();
-
-                    // Isn't username too long?
-                    if (userName.Length < 10)
-                    {
-                        // Isn't password too long?
-                        if (password.Length < 20)
-                        {
-                            // Register mode
-                            if (logMode == ImStatuses.IM_Register)
-                            {
-                                //// User already exists?
-                                //if (!this.Prog.UserList.Contains(userName))
-                                //{
-                                //    this.userInfo = new UserInfo(userName, password, this);
-                                //    //this.Prog.Users.Add(userName, this.userInfo); // Add new user
-                                //    this.writer.Write(ImStatuses.IM_OK);
-                                //    this.writer.Flush();
-                                //    Console.WriteLine("[{0}] ({1}) Registered new user", DateTime.Now, userName);
-                                //    this.Prog.SaveUsers();
-                                //    this.Receiver(); // Listen to client in loop.
-                                //}
-                                //else
-                                //{
-                                //    this.writer.Write(ImStatuses.IM_Exists);
-                                //}
-                            }
-                            else if (logMode == ImStatuses.IM_Login)
-                            {
-                                // Login mode
-                                // User exists?
-                                //if (this.Prog.Users.TryGetValue(userName, out this.userInfo))
-                                //{
-                                //    // Is password OK?
-                                //    if (password == this.userInfo.Password)
-                                //    {
-                                //        // If user is logged in yet, disconnect him.
-                                //        if (this.userInfo.LoggedIn)
-                                //        {
-                                //            this.userInfo.Connection.CloseConn();
-                                //        }
-
-                                //        this.userInfo.Connection = this;
-                                //        this.writer.Write(ImStatuses.IM_OK);
-                                //        this.writer.Flush();
-                                //        this.Receiver(); // Listen to client in loop.
-                                //    }
-                                //    else
-                                //    {
-                                //        this.writer.Write(ImStatuses.IM_WrongPass);
-                                //    }
-                                //}
-                                //else
-                                //{
-                                //    this.writer.Write(ImStatuses.IM_NoExists);
-                                //}
-                            }
-                        }
-                        else
-                        {
-                            this.writer.Write(ImStatuses.IM_TooPassword);
-                        }
-                    }
-                    else
-                    {
-                        this.writer.Write(ImStatuses.IM_TooUsername);
                     }
                 }
 
                 this.CloseConn();
             }
-            catch
+            catch (Exception ex)
             {
+                EventLogging.WriteError(ex, "An error has occurred trying to setup the connection.");
                 this.CloseConn();
             }
         }
@@ -307,7 +252,17 @@ namespace CIS499_IM_Server
         {
             try
             {
-                this.userInfo.LoggedIn = false;
+                if (this.userInfo != null)
+                {
+                    lock (this.Prog.UserConnections)
+                    {
+                        this.Prog.UserConnections.Remove((int)this.userInfo.UserId);
+                    }
+                        this.userInfo.LoggedIn = false;
+                }
+
+                
+
                 this.reader.Close();
                 this.writer.Close();
                 this.ssl.Close();
@@ -317,6 +272,7 @@ namespace CIS499_IM_Server
             }
             catch (Exception ex)
             {
+                EventLogging.WriteError(ex, "An exception has occurred at user logout.");
             }
         }
 
@@ -325,7 +281,7 @@ namespace CIS499_IM_Server
         /// </summary>
         internal void Receiver()  // Receive all incoming packets.
         {
-            Console.WriteLine("[{0}] ({1}) User logged in", DateTime.Now, this.userInfo.UserName);
+            EventLogging.WriteEvent("User " + this.userInfo.UserName + " has logged in.", EventLogEntryType.Information);
             this.userInfo.LoggedIn = true;
 
             try
@@ -335,51 +291,56 @@ namespace CIS499_IM_Server
                 {
                     var type = this.reader.ReadByte();  // Get incoming packet type.
 
-                    if (type == ImStatuses.IM_IsAvailable)
+                    switch (type)
                     {
-                        string who = this.reader.ReadString();
+                        case ImStatuses.IM_IsAvailable:
+                            {
+                                string who = this.reader.ReadString();
 
-                        this.writer.Write(ImStatuses.IM_IsAvailable);
-                        this.writer.Write(who);
+                                this.writer.Write(ImStatuses.IM_IsAvailable);
+                                this.writer.Write(who);
 
-                        UserInfo info;
-                        //if (this.Prog.Users.TryGetValue(who, out info))
-                        //{
-                        //    if (info.LoggedIn) 
-                        //    {
-                        //        this.writer.Write(true); // Available
-                        //    }
-                        //    else 
-                        //    {
-                        //        this.writer.Write(false);  // Unavailable
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //    this.writer.Write(false);      // Unavailable
-                        //}
+                                UserInfo info;
+                                //if (this.Prog.Users.TryGetValue(who, out info))
+                                //{
+                                //    if (info.LoggedIn) 
+                                //    {
+                                //        this.writer.Write(true); // Available
+                                //    }
+                                //    else 
+                                //    {
+                                //        this.writer.Write(false);  // Unavailable
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    this.writer.Write(false);      // Unavailable
+                                //}
 
-                        this.writer.Flush();
-                    }
-                    else if (type == ImStatuses.IM_Send)
-                    {
-                        var to = this.reader.ReadString();
-                        var msg = this.reader.ReadString();
+                                this.writer.Flush();
+                            }
+                            break;
+                        case ImStatuses.IM_Send:
+                            {
+                                var to = this.reader.ReadString();
+                                var msg = this.reader.ReadString();
 
-                        UserInfo recipient;
-                        //if (this.Prog.Users.TryGetValue(to, out recipient))
-                        //{
-                        //    // Is recipient logged in?
-                        //    if (recipient.LoggedIn)
-                        //    {
-                        //        // Write received packet to recipient
-                        //        recipient.Connection.writer.Write(ImStatuses.IM_Received);
-                        //        recipient.Connection.writer.Write(this.userInfo.UserName);  // From
-                        //        recipient.Connection.writer.Write(msg);
-                        //        recipient.Connection.writer.Flush();
-                        //        Console.WriteLine("[{0}] ({1} -> {2}) Message sent!", DateTime.Now, this.userInfo.UserName, recipient.UserName);
-                        //    }
-                        //}
+                                UserInfo recipient;
+                                //if (this.Prog.Users.TryGetValue(to, out recipient))
+                                //{
+                                //    // Is recipient logged in?
+                                //    if (recipient.LoggedIn)
+                                //    {
+                                //        // Write received packet to recipient
+                                //        recipient.Connection.writer.Write(ImStatuses.IM_Received);
+                                //        recipient.Connection.writer.Write(this.userInfo.UserName);  // From
+                                //        recipient.Connection.writer.Write(msg);
+                                //        recipient.Connection.writer.Flush();
+                                //        Console.WriteLine("[{0}] ({1} -> {2}) Message sent!", DateTime.Now, this.userInfo.UserName, recipient.UserName);
+                                //    }
+                                //}
+                            }
+                            break;
                     }
                 }
             }

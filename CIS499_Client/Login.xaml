@@ -10,7 +10,7 @@
         <Label Content="Password:" Height="28" HorizontalAlignment="Left" Margin="15,106,0,0" Name="label2" VerticalAlignment="Top" />
         <Menu HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="266" Background="{x:Null}">
             <MenuItem Header="Menu">
-                <Button Content="Sign up" Name="BtnReg" />
+                <Button Content="Sign up" Name="BtnReg" Click="BtnReg_Click" />
                 <Button Content="Options"  Name="BtnOpt" Click="BtnOpt_Click" />
                 <Separator />
                 <Button Content="Exit" Name="BtnQuit" />
