@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Settings.cs" company="Sam Novak">
-//   
+//   C# Instant Messenger XAML client
 // </copyright>
 // <summary>
 //   Defines the Settings type.
@@ -20,7 +20,7 @@ namespace CIS499_Client
     /// <summary>
     /// The settings.
     /// </summary>
-    internal sealed partial class Settings
+    public sealed partial class Settings
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Settings"/> class.
@@ -28,10 +28,10 @@ namespace CIS499_Client
         public Settings() 
         {
             // // To add event handlers for saving and changing settings, uncomment the lines below:
-            //
-            // this.SettingChanging += this.SettingChangingEventHandler;
-            //
-            // this.SettingsSaving += this.SettingsSavingEventHandler;
+
+            this.SettingChanging += this.SettingChangingEventHandler;
+
+            this.SettingsSaving += this.SettingsSavingEventHandler;
         }
 
         /// <summary>

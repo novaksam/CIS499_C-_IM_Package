@@ -81,7 +81,7 @@ namespace CIS499_IM_Server
         /// <summary>
         ///     The database repository.
         /// </summary>
-        internal UsersDBRepository dbRepository = new UsersDBRepository();
+        public UsersDBRepository DBRepository = new UsersDBRepository();
 
         /// <summary>
         ///     The lock token.
@@ -154,11 +154,11 @@ namespace CIS499_IM_Server
             //Monitor.TryEnter(this.dbRepository, -1, ref this.lockToken);
             try
             {
-                lock (this.dbRepository)
+                lock (this.DBRepository)
                 {
                     lock (this.UserList)
                     {
-                        this.UserList = new List<UserClass>(this.dbRepository.ToList());
+                        this.UserList = new List<UserClass>(this.DBRepository.ToList());
                     }
                 }
             }
@@ -225,7 +225,7 @@ namespace CIS499_IM_Server
                 TcpClient tcpClient = this.Server.AcceptTcpClient(); // Accept incoming connection.
 
                 // TODO Setup the client verification part
-                var client = new Client(this, tcpClient, ref this.dbRepository);
+                var client = new Client(this, tcpClient);
                 client.Start();
             }
         }

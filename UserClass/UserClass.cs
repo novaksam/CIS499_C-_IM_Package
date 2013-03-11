@@ -6,7 +6,6 @@
 //   Defines the UserClass type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace UserClass
 {
     using System;
@@ -16,38 +15,15 @@ namespace UserClass
     using System.Runtime.Serialization.Formatters.Binary;
 
     /// <summary>
-    /// The user class.
+    ///     The user class.
     /// </summary>
     [Serializable]
     public class UserClass : IDisposable, ICloneable
     {
-        /// <summary>
-        /// Gets the user name.
-        /// </summary>
-        public string UserName { get; private set; }
+        #region Constructors and Destructors
 
         /// <summary>
-        /// Gets the user id.
-        /// </summary>
-        public uint UserId { get; private set; }
-
-        /// <summary>
-        /// Gets the password hash.
-        /// </summary>
-        public string PasswordHash { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether logged in.
-        /// </summary>
-        public bool LoggedIn { get; private set; }
-
-        /// <summary>
-        /// Gets the friends.
-        /// </summary>
-        public List<UserClass> Friends { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserClass"/> class.
+        ///     Initializes a new instance of the <see cref="UserClass" /> class.
         /// </summary>
         public UserClass()
         {
@@ -89,7 +65,7 @@ namespace UserClass
         /// <param name="logged">
         /// The logged.
         /// </param>
-        public UserClass(string userName, uint id, string pass, bool logged)
+        public UserClass(string userName, int id, string pass, bool logged)
         {
             this.UserName = userName;
             this.UserId = id;
@@ -98,70 +74,53 @@ namespace UserClass
             this.Friends = new List<UserClass>();
         }
 
-        /// <summary>
-        /// The to string.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        public override string ToString()
-        {
-            return this.UserName;
-        }
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
-        /// The clone.
+        ///     Gets or sets the friends.
         /// </summary>
-        /// <returns>
-        /// The <see cref="object"/>.
-        /// </returns>
-        public object Clone()
-        {
-            return this.MemberwiseClone();
-        }
+        public List<UserClass> Friends { get; set; }
 
         /// <summary>
-        /// The dispose.
+        ///     Gets or sets a value indicating whether logged in.
         /// </summary>
-        public void Dispose()
-        {
-            this.UserName = null;
-            this.PasswordHash = null;
-            this.Friends = null;
-            GC.SuppressFinalize(this);
-        }
+        public bool LoggedIn { get; set; }
 
         /// <summary>
-        /// The serialize.
+        ///     Gets or sets the password hash.
         /// </summary>
-        /// <param name="obj">
-        /// The user
-        /// </param>
-        /// <returns>
-        /// The byte array of the user
-        /// </returns>
-        public static byte[] Serialize(UserClass obj)
-        {
-            if (obj == null)
-            {
-                return null;
-            }
+        public string PasswordHash { get; set; }
 
-            var bf = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
-            var ms = new MemoryStream();
-            bf.Serialize(ms, obj);
-            return ms.ToArray();
-        }
+        /// <summary>
+        ///     Gets or sets the user id.
+        /// </summary>
+        public int UserId { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the user name.
+        /// </summary>
+        public string UserName { get; set; }
+
+        #endregion
+
+        #region Public Methods and Operators
 
         /// <summary>
         /// De serialize
         /// </summary>
-        /// <param name="bytes">the array of bytes to convert back to the class</param>
-        /// <returns>The user</returns>
+        /// <param name="bytes">
+        /// the array of bytes to convert back to the class
+        /// </param>
+        /// <returns>
+        /// The user
+        /// </returns>
         public static UserClass Deserialize(byte[] bytes)
         {
+            // IFormatter formatter = new BinaryFormatter();
             var memStream = new MemoryStream();
-            var binForm = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
+            var binForm = new BinaryFormatter(); // { AssemblyFormat = FormatterAssemblyStyle.Full };
             memStream.Write(bytes, 0, bytes.Length);
             memStream.Seek(0, SeekOrigin.Begin);
             var obj = binForm.Deserialize(memStream) as UserClass;
@@ -181,12 +140,34 @@ namespace UserClass
         public static List<UserClass> RestoreFriends(byte[] bytes)
         {
             var memStream = new MemoryStream();
-            var binForm = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
+            var binForm = new BinaryFormatter(); // { AssemblyFormat = FormatterAssemblyStyle.Simple };
             memStream.Write(bytes, 0, bytes.Length);
             memStream.Seek(0, SeekOrigin.Begin);
             var obj = binForm.Deserialize(memStream) as List<UserClass>;
             memStream.Dispose();
             return obj;
+        }
+
+        /// <summary>
+        /// The serialize.
+        /// </summary>
+        /// <param name="obj">
+        /// The user
+        /// </param>
+        /// <returns>
+        /// The byte array of the user
+        /// </returns>
+        public static byte[] Serialize(UserClass obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            var bf = new BinaryFormatter(); // { AssemblyFormat = FormatterAssemblyStyle.Full };
+            var ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
         }
 
         /// <summary>
@@ -210,5 +191,40 @@ namespace UserClass
             bf.Serialize(ms, obj);
             return ms.ToArray();
         }
+
+        /// <summary>
+        ///     The clone.
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="object" />.
+        /// </returns>
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+        /// <summary>
+        ///     The dispose.
+        /// </summary>
+        public void Dispose()
+        {
+            this.UserName = null;
+            this.PasswordHash = null;
+            this.Friends = null;
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        ///     The to string.
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="string" />.
+        /// </returns>
+        public override string ToString()
+        {
+            return this.UserName;
+        }
+
+        #endregion
     }
 }

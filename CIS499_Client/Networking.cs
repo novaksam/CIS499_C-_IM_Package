@@ -15,17 +15,20 @@ namespace CIS499_Client
     using System.Net.Sockets;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using CIS499_Client.Properties;
+    using System.Configuration;
     using System.Threading;
 
     using Imstatuses;
 
-    using UserClass;
     using Packet;
+
+    using UserClass;
 
     /// <summary>
     /// The networking.
     /// </summary>
-    internal class Networking
+    public class Networking : IDisposable
     {
         /// <summary>
         /// The TCP client.
@@ -45,17 +48,17 @@ namespace CIS499_Client
         /// <summary>
         /// The failed connect.
         /// </summary>
-        private SocketException failedConnect = new SocketException(543);
+        //private SocketException failedConnect;// = new SocketException(543);
 
         /// <summary>
         /// Wrong password exception
         /// </summary>
-        private Exception wrongPasswordException = new Exception("Password incorrect");
+        //private Exception wrongPasswordException;// = new Exception("Password incorrect");
 
         /// <summary>
         /// No user exception
         /// </summary>
-        private Exception noUserException = new Exception("No user with that Username exists.");
+        //private Exception noUserException;// = new Exception("No user with that Username exists.");
 
         /// <summary>
         /// The security stream.
@@ -85,7 +88,7 @@ namespace CIS499_Client
         /// <summary>
         /// The user
         /// </summary>
-        private UserClass theUser;
+        internal UserClass TheUser { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Networking"/> class. 
@@ -96,13 +99,15 @@ namespace CIS499_Client
         /// </param>
         public Networking(UserClass user)
         {
-            this.theUser = user.Clone() as UserClass;
+
+            this.TheUser = user.Clone() as UserClass;
             // Creates the connection
+            var time = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
             this.tcpClient = new TcpClient(Settings.Default.Server, Settings.Default.Port);
 
             if (!this.tcpClient.Connected)
             {
-                throw this.failedConnect;
+                //throw this.failedConnect;
             }
 
             this.loggedIn = true;
@@ -156,21 +161,22 @@ namespace CIS499_Client
                 byte[] use = this.reader.ReadBytes(length);
 
                 // Convert that array into a user.
-                this.theUser = UserClass.Deserialize(use).Clone() as UserClass;
+                this.TheUser = UserClass.Deserialize(use).Clone() as UserClass;
+                
 
                 return true;
             }
             
             if (temp == ImStatuses.ImWrongPass)
             {
-                this.wrongPasswordException.Source = "User login";
-                throw this.wrongPasswordException;
+                //this.wrongPasswordException.Source = "User login";
+                //throw this.wrongPasswordException;
             }
 
             if (temp == ImStatuses.ImNoExists)
             {
-                this.noUserException.Source = "User login";
-                throw this.noUserException;
+                //this.noUserException.Source = "User login";
+                //throw this.noUserException;
             }
             
             return false;
@@ -193,6 +199,9 @@ namespace CIS499_Client
             this.writer.Write(serial);
             this.writer.Flush();
 
+            // TODO add code to determine cause of failure.
+            // perhaps change the return type.
+            // Actually I could probably use the IM statuses for this.
             var temp = this.reader.ReadByte();
             if (temp == ImStatuses.ImOk)
             {
@@ -326,6 +335,31 @@ namespace CIS499_Client
             // else
             //    return false;
             return true; // Allow untrusted certificates.
+        }
+
+        /// <summary>
+        /// Dispose members and objects.
+        /// </summary>
+        public void Dispose()
+        {
+            // this.listener.Stop();
+            this.writer.Close();
+            this.writer.Dispose();
+            this.reader.Close();
+            this.reader.Dispose();
+            this.ssl.Close();
+            this.ssl.Dispose();
+            this.stream.Close();
+            this.stream.Dispose();
+            this.TheUser.Dispose();
+        }
+
+        /// <summary>
+        /// Interface based dispose method
+        /// </summary>
+        void IDisposable.Dispose()
+        {
+            this.Dispose();
         }
     }
 }

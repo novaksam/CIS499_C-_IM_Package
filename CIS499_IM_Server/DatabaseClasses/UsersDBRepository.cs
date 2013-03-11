@@ -15,6 +15,7 @@ namespace CIS499_IM_Server.DatabaseClasses
     using System.Diagnostics.CodeAnalysis;
 
     using UserClass;
+    using System.Threading;
 
     /// <summary>
     ///     Default IUsers_DBRepository implementation
@@ -27,6 +28,8 @@ namespace CIS499_IM_Server.DatabaseClasses
         ///     Gets or sets the transaction.
         /// </summary>
         public SqlCeTransaction Transaction { get; set; }
+
+        private static Mutex mutex = new Mutex(false, "Database_Mutex");
 
         #endregion
 
@@ -346,7 +349,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -398,7 +401,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -447,7 +450,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -499,7 +502,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -548,7 +551,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -647,7 +650,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -676,6 +679,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public List<UsersDB> SelectByUserName(string userName)
         {
+            mutex.WaitOne();
             var list = new List<UsersDB>();
             using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
@@ -696,7 +700,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"],
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -706,7 +710,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
-
+            mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
 
@@ -728,6 +732,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public List<UsersDB> SelectByUserName(string userName, int count)
         {
+            mutex.WaitOne();
             var list = new List<UsersDB>();
             using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
@@ -748,7 +753,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -758,7 +763,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
-
+            mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
 
@@ -809,6 +814,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public List<UsersDB> ToList()
         {
+            mutex.WaitOne();
             var list = new List<UsersDB>();
             using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
@@ -819,7 +825,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -829,7 +835,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
-
+            mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
 
@@ -848,6 +854,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public List<UsersDB> ToList(int count)
         {
+            mutex.WaitOne();
             var list = new List<UsersDB>();
             using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
@@ -858,7 +865,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     {
                         var item = new UsersDB
                                        {
-                                           UserId = (int?)(reader.IsDBNull(0) ? null : reader["UserID"]), 
+                                           UserId = (int)reader["UserID"], 
                                            UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
                                            PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
                                            Friends =
@@ -868,6 +875,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
+            mutex.ReleaseMutex();
 
             return list.Count > 0 ? list : null;
         }

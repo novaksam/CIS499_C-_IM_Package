@@ -5,10 +5,10 @@
     <Setting Name="Server" Roaming="true" Type="System.String" Scope="User">
       <Value Profile="(Default)">127.0.0.1</Value>
     </Setting>
-    <Setting Name="Port" Type="System.Int32" Scope="User">
+    <Setting Name="Port" Roaming="true" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2002</Value>
     </Setting>
-    <Setting Name="Cert_Owner" Type="System.String" Scope="User">
+    <Setting Name="Cert_Owner" Roaming="true" Type="System.String" Scope="User">
       <Value Profile="(Default)">UWSP CNMT</Value>
     </Setting>
   </Settings>

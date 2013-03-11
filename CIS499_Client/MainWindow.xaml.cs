@@ -28,13 +28,15 @@ namespace CIS499_Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private Networking net;
+
+        public MainWindow(Networking networking)
         {
             InitializeComponent();
-            App.FillUser(ref App.User);
-
-            OnlineList.ItemsSource = App.User.Friends.Where(@class => @class.LoggedIn == true);
-            OfflineList.ItemsSource = App.User.Friends.Where(@class => @class.LoggedIn == false);
+            //App.FillUser(ref App.User);
+            this.net = networking;
+            OnlineList.ItemsSource = net.TheUser.Friends.Where(@class => @class.LoggedIn == true);
+            OfflineList.ItemsSource = net.TheUser.Friends.Where(@class => @class.LoggedIn == false);
             
         }
 
@@ -59,6 +61,19 @@ namespace CIS499_Client
         private void OnlineList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
 
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+            Application.Current.Shutdown();
+        }
+
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            var login = new Login();
+            login.Show();
+            this.Close();
         }
     }
 }

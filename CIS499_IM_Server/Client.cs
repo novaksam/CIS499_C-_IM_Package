@@ -36,17 +36,15 @@ namespace CIS499_IM_Server
         /// Initializes a new instance of the <see cref="Client"/> class.
         /// </summary>
         /// <param name="p">
-        /// The p.
+        ///     The p.
         /// </param>
         /// <param name="c">
-        /// The c.
+        ///     The c.
         /// </param>
-        /// <param name="db">
-        /// reference to the database
-        /// </param>
-        public Client(Program p, TcpClient c, ref UsersDBRepository db)
+        public Client(Program p, TcpClient c)
         {
-            this.thread = new Thread(this.SetupConn);
+            this.thread = new Thread(this.SetupConn) { Name = "Client thread" };
+            this.thread.SetApartmentState(ApartmentState.MTA);
             this.Prog = p;
             this.client = c;
             // this.dbRepository = db;
@@ -160,9 +158,10 @@ namespace CIS499_IM_Server
                             // Convert that array into a user.
                             user = UserClass.Deserialize(use);
 
-                            lock (this.Prog.dbRepository)
+                            // TODO: research mutex
+                            lock (this.Prog.DBRepository)
                             {
-                                var list = this.Prog.dbRepository.SelectByUserName(user.UserName);
+                                var list = this.Prog.DBRepository.SelectByUserName(user.UserName);
 
                                 if (list.Count < 1)
                                 {
@@ -171,12 +170,20 @@ namespace CIS499_IM_Server
                                     break;
                                 }
 
-                                var temp = list[0];
+                                UserClass temp = list[0] as UserClass;
                                 if (user.PasswordHash == temp.PasswordHash)
                                 {
                                     // User logged in so return their account to them
-                                    this.writer.Write(ImStatuses.ImIsAvailable);
-                                    var logg = UserClass.Serialize(temp);
+                                    this.writer.Write(ImStatuses.ImOk);
+                                    var temp2 = new UserClass(
+                                        temp.UserName, 
+                                        temp.UserId, 
+                                        temp.PasswordHash,
+                                        true)
+                                                    {
+                                                        Friends = temp.Friends
+                                                    };
+                                    var logg = UserClass.Serialize(temp2);
                                     this.writer.Write(logg.Length);
                                     this.writer.Write(logg);
                                     this.writer.Flush();
@@ -184,14 +191,31 @@ namespace CIS499_IM_Server
                                     // Add the connection to the database
                                     lock (this.Prog.UserConnections)
                                     {
+                                        if (this.Prog.UserConnections.ContainsKey(temp.UserId))
+                                        {
+                                            this.Prog.UserConnections.Remove(temp.UserId);
+                                        }
                                         Debug.Assert(temp.UserId != null, "temp.UserId != null");
-                                        this.Prog.UserConnections.Add((int)temp.UserId, this.client);
+                                        this.Prog.UserConnections.Add(temp.UserId, this.client);
                                     }
                                     
                                     // With the call going to the receiver the
                                     // temp should still be in scope
                                     // this.userInfo = temp.Clone() as UserInfo;
-                                    this.userInfo = temp as UserInfo;
+                                    
+                                    this.userInfo = temp.Clone() as UserInfo;
+                                    if (this.userInfo == null)
+                                    {
+                                        this.userInfo = new UserInfo
+                                                            {
+                                                                Connection = this,
+                                                                UserId = temp.UserId,
+                                                                UserName = temp.UserName,
+                                                                PasswordHash = temp.PasswordHash,
+                                                                Friends = temp.Friends
+                                                            };
+                                        // this.userInfo.Connection = this;
+                                    }
                                     this.Receiver();
                                 }
                                 else
@@ -212,15 +236,15 @@ namespace CIS499_IM_Server
 
                             // Convert that array into a user.
                             user = UserClass.Deserialize(use);
-                            lock (this.Prog.dbRepository)
+                            lock (this.Prog.DBRepository)
                             {
-                                if (this.Prog.dbRepository.SelectByUserName(user.UserName) == null)
+                                if (this.Prog.DBRepository.SelectByUserName(user.UserName) == null)
                                 {
                                     var temp = new UsersDB();
                                     temp.UserName = user.UserName;
                                     temp.PassHash = user.PasswordHash;
                                     temp.Friends = user.Friends;
-                                    this.Prog.dbRepository.Create(temp);
+                                    this.Prog.DBRepository.Create(temp);
                                     this.writer.Write(ImStatuses.ImOk);
                                     this.writer.Flush();
                                 }

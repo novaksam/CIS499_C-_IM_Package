@@ -17,20 +17,20 @@ namespace CIS499_IM_Server
     [Serializable]
     public class UserInfo : DatabaseClasses.UsersDB
     {
-        /// <summary>
-        /// The user name.
-        /// </summary>
-        public new string UserName;
+        ///// <summary>
+        ///// The user name.
+        ///// </summary>
+        //public new string UserName;
 
-        /// <summary>
-        /// The password.
-        /// </summary>
-        public new string PassHash;
+        ///// <summary>
+        ///// The password.
+        ///// </summary>
+        //public new string PassHash;
 
-        /// <summary>
-        /// The logged in.
-        /// </summary>
-        [NonSerialized] public new bool LoggedIn;      // Is logged in and connected?
+        ///// <summary>
+        ///// The logged in.
+        ///// </summary>
+        //[NonSerialized] public new bool LoggedIn;      // Is logged in and connected?
 
         /// <summary>
         /// The connection.
@@ -49,7 +49,7 @@ namespace CIS499_IM_Server
         public UserInfo(string user, string pass)
         {
             this.UserName = user;
-            this.PassHash = pass;
+            this.PasswordHash = pass;
             this.LoggedIn = false;
         }
 
@@ -68,9 +68,14 @@ namespace CIS499_IM_Server
         public UserInfo(string user, string pass, Client conn)
         {
             this.UserName = user;
-            this.PassHash = pass;
+            this.PasswordHash = pass;
             this.LoggedIn = true;
             this.Connection = conn;
+        }
+
+        public UserInfo()
+        {
+            
         }
     }
 }

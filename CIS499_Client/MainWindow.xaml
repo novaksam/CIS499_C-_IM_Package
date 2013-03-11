@@ -27,7 +27,9 @@
         <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,29,0,0" Name="textBlock1" Text="Logged in as:" VerticalAlignment="Top" Width="210" />
         <Menu Height="23" HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="{Binding}" Background="{x:Null}" BorderBrush="Black">
             <MenuItem Header="Menu" Margin="5,0,0,0">
-                <MenuItem Header="Exit" />
+                <MenuItem Header="Logout" Name="Logout" Click="Logout_Click" />
+                <Separator />
+                <MenuItem Header="Exit" Name="Exit" Click="Exit_Click" />
             </MenuItem>
         </Menu>
     </Grid>
