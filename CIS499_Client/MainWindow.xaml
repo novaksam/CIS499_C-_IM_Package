@@ -1,37 +1,59 @@
 ﻿<Window x:Class="CIS499_Client.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="368" Width="314" xmlns:my1="clr-namespace:CIS499_Client">
+        Title="MainWindow" Height="368" Width="314">
     <Window.Resources>
         <!-- Background of selected item when focused -->
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
-                     Color="Transparent"/>
+        <!--<SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                     Color="#FFFF82FF"/>-->
+        <Style x:Key="SimpleListBoxItem" TargetType="ListBoxItem">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border
+           Name="Border"
+           Padding="2"
+           SnapsToDevicePixels="true">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="Border" Property="Background"
+                     Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Grid>
-        <ListBox HorizontalAlignment="Left" Margin="5,58,0,0" Name="listBox3" VerticalAlignment="Top" Height="241" Width="277" SelectionChanged="listBox3_SelectionChanged" >
+        <ListBox HorizontalAlignment="Stretch" Margin="5,55,25,40" Name="Listlist" VerticalAlignment="Stretch" ItemContainerStyle="{StaticResource SimpleListBoxItem}">
             <ListBoxItem>
                 <Expander Header="Online" Height="Auto" Name="OnlineExpand" Width="234" Margin="5,5,15,5" IsExpanded="False" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <Grid>
-                        <ListBox Height="82" HorizontalAlignment="Left" Margin="1,6,3,0" Name="OnlineList" VerticalAlignment="Top" Width="{Binding ElementName=OnlineExpand, Path=ActualWidth}" SelectionChanged="listBox1_SelectionChanged" Grid.ColumnSpan="2" MouseDoubleClick="OnlineList_MouseDoubleClick" BorderBrush="{x:Null}"></ListBox>
+                        <ListBox Height="82" HorizontalAlignment="Left" Margin="1,6,3,0" Name="OnlineList" VerticalAlignment="Top" Width="{Binding ElementName=OnlineExpand, Path=ActualWidth}" Grid.ColumnSpan="1" MouseDoubleClick="OnlineList_MouseDoubleClick" BorderBrush="{x:Null}" SelectionChanged="OnlineList_SelectionChanged"></ListBox>
                     </Grid>
                 </Expander>
             </ListBoxItem>
             <ListBoxItem>
                 <Expander Header="Offline" Height="Auto" Name="OfflineExpander" Width="234" Margin="5,5,15,0" IsExpanded="False" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <Grid>
-                        <ListBox Height="100" HorizontalAlignment="Left" Margin="1,6,0,0" Name="OfflineList" VerticalAlignment="Top" Width="{Binding ElementName=OfflineExpander, Path=ActualWidth}" Padding="0" BorderBrush="{x:Null}" />
+                        <ListBox Height="100" HorizontalAlignment="Stretch" Margin="1,6,1,0" Name="OfflineList" VerticalAlignment="Top" Padding="0" HorizontalContentAlignment="Stretch" ItemsSource="{Binding IsAsync=True, BindsDirectlyToSource=True, NotifyOnSourceUpdated=True}" MouseDoubleClick="OfflineList_MouseDoubleClick"></ListBox>
                     </Grid>
                 </Expander>
             </ListBoxItem>
         </ListBox>
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,29,0,0" Name="textBlock1" Text="Logged in as:" VerticalAlignment="Top" Width="210" />
-        <Menu Height="23" HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="{Binding}" Background="{x:Null}" BorderBrush="Black">
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,29,0,0" Name="LogInText" Text="Logged in as: " VerticalAlignment="Top" Width="210" />
+        <Menu Height="23" HorizontalAlignment="Left" Name="Menu1" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="Black">
             <MenuItem Header="Menu" Margin="5,0,0,0">
                 <MenuItem Header="Logout" Name="Logout" Click="Logout_Click" />
                 <Separator />
                 <MenuItem Header="Exit" Name="Exit" Click="Exit_Click" />
             </MenuItem>
         </Menu>
+        <Button Content="Add Friend" Height="23" HorizontalAlignment="Left" Margin="5,0,0,10" Name="BtnAddFriends" VerticalAlignment="Bottom" Width="75" Click="BtnAddFriends_Click" />
     </Grid>
 </Window>
     

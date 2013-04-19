@@ -10,11 +10,9 @@
 namespace CIS499_IM_Server
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
-    using System.Net;
     using System.Net.Security;
     using System.Net.Sockets;
     using System.Security.Authentication;
@@ -47,6 +45,7 @@ namespace CIS499_IM_Server
             this.thread.SetApartmentState(ApartmentState.MTA);
             this.Prog = p;
             this.client = c;
+
             // this.dbRepository = db;
         }
 
@@ -111,11 +110,6 @@ namespace CIS499_IM_Server
         private UserInfo userInfo;  // Information about current user.
 
         /// <summary>
-        /// The database repository.
-        /// </summary>
-        private UsersDBRepository dbRepository;
-
-        /// <summary>
         /// The setup connection.
         /// </summary>
         internal void SetupConn()  // Setup connection and login or register.
@@ -159,74 +153,79 @@ namespace CIS499_IM_Server
                             user = UserClass.Deserialize(use);
 
                             // TODO: research mutex
-                            lock (this.Prog.DBRepository)
+                            // lock (this.Prog.DBRepository)
+                            // {
+                            var list = this.Prog.DBRepository.SelectByUserName(user.UserName);
+
+                            if (list.Count < 1)
                             {
-                                var list = this.Prog.DBRepository.SelectByUserName(user.UserName);
-
-                                if (list.Count < 1)
-                                {
-                                    this.writer.Write(ImStatuses.ImNoExists);
-                                    this.writer.Flush();
-                                    break;
-                                }
-
-                                UserClass temp = list[0] as UserClass;
-                                if (user.PasswordHash == temp.PasswordHash)
-                                {
-                                    // User logged in so return their account to them
-                                    this.writer.Write(ImStatuses.ImOk);
-                                    var temp2 = new UserClass(
-                                        temp.UserName, 
-                                        temp.UserId, 
-                                        temp.PasswordHash,
-                                        true)
-                                                    {
-                                                        Friends = temp.Friends
-                                                    };
-                                    var logg = UserClass.Serialize(temp2);
-                                    this.writer.Write(logg.Length);
-                                    this.writer.Write(logg);
-                                    this.writer.Flush();
-
-                                    // Add the connection to the database
-                                    lock (this.Prog.UserConnections)
-                                    {
-                                        if (this.Prog.UserConnections.ContainsKey(temp.UserId))
-                                        {
-                                            this.Prog.UserConnections.Remove(temp.UserId);
-                                        }
-                                        Debug.Assert(temp.UserId != null, "temp.UserId != null");
-                                        this.Prog.UserConnections.Add(temp.UserId, this.client);
-                                    }
-                                    
-                                    // With the call going to the receiver the
-                                    // temp should still be in scope
-                                    // this.userInfo = temp.Clone() as UserInfo;
-                                    
-                                    this.userInfo = temp.Clone() as UserInfo;
-                                    if (this.userInfo == null)
-                                    {
-                                        this.userInfo = new UserInfo
-                                                            {
-                                                                Connection = this,
-                                                                UserId = temp.UserId,
-                                                                UserName = temp.UserName,
-                                                                PasswordHash = temp.PasswordHash,
-                                                                Friends = temp.Friends
-                                                            };
-                                        // this.userInfo.Connection = this;
-                                    }
-                                    this.Receiver();
-                                }
-                                else
-                                {
-                                    this.writer.Write(ImStatuses.ImWrongPass);
-                                    this.writer.Flush();
-                                    // this.CloseConn();
-                                }
+                                this.writer.Write(ImStatuses.ImNoExists);
+                                this.writer.Flush();
+                                break;
                             }
 
+                            var tempUse = list[0];
+                            if (user.PasswordHash == tempUse.PasswordHash)
+                            {
+                                // User logged in so return their account to them
+                                this.writer.Write(ImStatuses.ImOk);
+                                var temp2 = new UserClass(
+                                    tempUse.UserName,
+                                    tempUse.UserId,
+                                    tempUse.PasswordHash,
+                                    true)
+                                                {
+                                                    Friends = tempUse.Friends
+                                                };
+                                var logg = UserClass.Serialize(temp2);
+                                this.writer.Write(logg.Length);
+                                this.writer.Write(logg);
+                                this.writer.Flush();
+
+                                // Add the connection to the database
+                                lock (this.Prog.UserConnections)
+                                {
+                                    if (this.Prog.UserConnections.ContainsKey(tempUse.UserId))
+                                    {
+                                        this.Prog.UserConnections.Remove(tempUse.UserId);
+                                    }
+
+                                    this.Prog.UserConnections.Add(tempUse.UserId, this.client);
+                                }
+
+                                // With the call going to the receiver the
+                                // temp should still be in scope
+                                // this.userInfo = temp.Clone() as UserInfo;
+
+                                // TODO check which of these actually work
+                                this.userInfo = tempUse.Clone() as UserInfo;
+                                if (this.userInfo == null)
+                                {
+                                    this.userInfo = new UserInfo
+                                                        {
+                                                            Connection = this,
+                                                            UserId = tempUse.UserId,
+                                                            UserName = tempUse.UserName,
+                                                            PasswordHash = tempUse.PasswordHash,
+                                                            Friends = tempUse.Friends
+                                                        };
+
+                                    // this.userInfo.Connection = this;
+                                }
+
+                                this.Receiver();
+                            }
+                            else
+                            {
+                                this.writer.Write(ImStatuses.ImWrongPass);
+                                this.writer.Flush();
+
+                                // this.CloseConn();
+                            }
+
+                            // }
                             break;
+
                         case ImStatuses.ImRegister:
                             // Get the length of the incoming byte array
                             length = this.reader.ReadInt32();
@@ -236,25 +235,28 @@ namespace CIS499_IM_Server
 
                             // Convert that array into a user.
                             user = UserClass.Deserialize(use);
-                            lock (this.Prog.DBRepository)
+
+                            // lock (this.Prog.DBRepository)
+                            // {
+                            if (this.Prog.DBRepository.SelectByUserName(user.UserName) == null)
                             {
-                                if (this.Prog.DBRepository.SelectByUserName(user.UserName) == null)
-                                {
-                                    var temp = new UsersDB();
-                                    temp.UserName = user.UserName;
-                                    temp.PassHash = user.PasswordHash;
-                                    temp.Friends = user.Friends;
-                                    this.Prog.DBRepository.Create(temp);
-                                    this.writer.Write(ImStatuses.ImOk);
-                                    this.writer.Flush();
-                                }
-                                else
-                                {
-                                    this.writer.Write(ImStatuses.ImExists);
-                                    this.writer.Flush();
-                                    // this.CloseConn();
-                                }
+                                var temp = new UsersDB();
+                                temp.UserName = user.UserName;
+                                temp.PassHash = user.PasswordHash;
+                                temp.Friends = user.Friends;
+                                this.Prog.DBRepository.Create(temp);
+                                this.writer.Write(ImStatuses.ImOk);
+                                this.writer.Flush();
                             }
+                            else
+                            {
+                                this.writer.Write(ImStatuses.ImExists);
+                                this.writer.Flush();
+
+                                // this.CloseConn();
+                            }
+
+                            // }
                             break;
                         default:
                             this.CloseConn();
@@ -267,6 +269,7 @@ namespace CIS499_IM_Server
             catch (Exception ex)
             {
                 EventLogging.WriteError(ex, "An error has occurred trying to setup the connection.");
+                this.writer.Write(ImStatuses.ImError);
                 this.CloseConn();
             }
         }
@@ -282,12 +285,11 @@ namespace CIS499_IM_Server
                 {
                     lock (this.Prog.UserConnections)
                     {
-                        this.Prog.UserConnections.Remove((int)this.userInfo.UserId);
+                        this.Prog.UserConnections.Remove(this.userInfo.UserId);
                     }
-                        this.userInfo.LoggedIn = false;
-                }
 
-                
+                    this.userInfo.LoggedIn = false;
+                }
 
                 this.reader.Close();
                 this.writer.Close();
@@ -326,9 +328,8 @@ namespace CIS499_IM_Server
                                 this.writer.Write(ImStatuses.ImIsAvailable);
                                 this.writer.Write(who);
 
-                                UserInfo info;
-                                //if (this.Prog.Users.TryGetValue(who, out info))
-                                //{
+                                // if (this.Prog.Users.TryGetValue(who, out info))
+                                // {
                                 //    if (info.LoggedIn) 
                                 //    {
                                 //        this.writer.Write(true); // Available
@@ -337,14 +338,14 @@ namespace CIS499_IM_Server
                                 //    {
                                 //        this.writer.Write(false);  // Unavailable
                                 //    }
-                                //}
-                                //else
-                                //{
+                                // }
+                                // else
+                                // {
                                 //    this.writer.Write(false);      // Unavailable
-                                //}
-
+                                // }
                                 this.writer.Flush();
                             }
+
                             break;
                         case ImStatuses.ImSend:
                             {
@@ -352,8 +353,9 @@ namespace CIS499_IM_Server
                                 var msg = this.reader.ReadString();
 
                                 UserInfo recipient;
-                                //if (this.Prog.Users.TryGetValue(to, out recipient))
-                                //{
+
+                                // if (this.Prog.Users.TryGetValue(to, out recipient))
+                                // {
                                 //    // Is recipient logged in?
                                 //    if (recipient.LoggedIn)
                                 //    {
@@ -364,8 +366,70 @@ namespace CIS499_IM_Server
                                 //        recipient.Connection.writer.Flush();
                                 //        Console.WriteLine("[{0}] ({1} -> {2}) Message sent!", DateTime.Now, this.userInfo.UserName, recipient.UserName);
                                 //    }
-                                //}
+                                // }
                             }
+
+                            break;
+                        case ImStatuses.ImSearch:
+                            {
+                                // Get the length of the incoming byte array
+                                var length = this.reader.ReadInt32();
+
+                                // Read said byte array
+                                var use = this.reader.ReadBytes(length);
+
+                                // Convert that array into a user.
+                                var user = UserClass.Deserialize(use);
+
+                                var name = this.reader.ReadString();
+                                var temp = this.Prog.DBRepository.SearchByUserName(name, user);
+                                var users = UserClass.StoreFriends(temp);
+                                this.writer.Write(ImStatuses.ImSearch);
+                                this.writer.Write(users.Length);
+                                this.writer.Flush();
+                                this.writer.Write(users);
+                            }
+
+                            break;
+                        case ImStatuses.ImAddFriend:
+                            {
+                                // Get the length of the incoming byte array
+                                var length = this.reader.ReadInt32();
+
+                                // Read said byte array
+                                var use = this.reader.ReadBytes(length);
+
+                                // Convert that array into a user.
+                                var user = UserClass.Deserialize(use);
+
+                                // Length of the users to add
+                                var usersLength = this.reader.ReadInt32();
+
+                                // Read said byte array
+                                var uses = this.reader.ReadBytes(usersLength);
+
+                                // Convert to user list
+                                var users = UserClass.RestoreFriends(uses);
+
+                                // Add the selected friends to the range
+                                // TODO validation
+                                user.Friends.AddRange(users);
+
+                                // Update it in the database
+                                this.Prog.DBRepository.UpdateFriends(user);
+
+                                this.writer.Write(ImStatuses.ImAddFriend);
+                                var logg = UserClass.StoreFriends(user.Friends);
+                                this.writer.Write(logg.Length);
+                                this.writer.Write(logg);
+                                this.writer.Flush();
+
+                                // this.Prog.DBRepository.SelectByUserName(user.UserName);
+
+                                // var name = this.reader.ReadString();
+                                // this.Prog.DBRepository.
+                            }
+
                             break;
                     }
                 }

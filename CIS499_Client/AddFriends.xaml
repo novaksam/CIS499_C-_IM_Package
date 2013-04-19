@@ -1,0 +1,13 @@
+﻿<Window x:Class="CIS499_Client.AddFriends"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AddFriends" Height="300" Width="300" ResizeMode="NoResize">
+    <Grid>
+        <ListBox Height="176" HorizontalAlignment="Left" Margin="12,44,0,0" Name="ResultsBox" VerticalAlignment="Top" Width="254" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="60,12,0,0" Name="TxtUserName" VerticalAlignment="Top" Width="120" TabIndex="1" />
+        <Label Content="Name:" Height="28" HorizontalAlignment="Left" Margin="12,10,0,0" Name="LblName" VerticalAlignment="Top" />
+        <Button Content="Search" Height="23" HorizontalAlignment="Left" Margin="191,12,0,0" Name="BtnSearch" VerticalAlignment="Top" Width="75" TabIndex="2" Click="BtnSearchClick" />
+        <Button Content="Add" Height="23" HorizontalAlignment="Left" Margin="105,226,0,0" Name="BtnAdd" VerticalAlignment="Top" Width="75" TabIndex="3" Click="BtnAddClick" />
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="0,226,12,0" Name="BtnCancel" VerticalAlignment="Top" Width="75" IsCancel="True" TabIndex="4" Click="BtnCancelClick" />
+    </Grid>
+</Window>

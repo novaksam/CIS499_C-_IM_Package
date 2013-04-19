@@ -10,7 +10,7 @@
 namespace CIS499_Client
 {
     using System.Diagnostics.CodeAnalysis;
-    using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
 
     using UserClass;
@@ -24,17 +24,26 @@ namespace CIS499_Client
     // ReSharper restore RedundantExtendsListEntry
     {
         /// <summary>
+        /// The running.
+        /// </summary>
+        private bool running = true;
+
+        /// <summary>
+        /// The user.
+        /// </summary>
+        private UserClass user;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RegisterWindow"/> class.
         /// </summary>
         public RegisterWindow()
         {
-            //var setLoad = new Task(Settings.Default.Reload);
-            //setLoad.Start();
             InitializeComponent();
+            progressBar1.Maximum = 10;
         }
 
         /// <summary>
-        /// The btn reg_ click.
+        /// The button reg_ click.
         /// </summary>
         /// <param name="sender">
         /// The sender.
@@ -44,28 +53,32 @@ namespace CIS499_Client
         /// </param>
         private void BtnRegClick(object sender, RoutedEventArgs e)
         {
-
-            if (this.TxtUsername.Text == string.Empty)
+            if (string.IsNullOrEmpty(this.TxtUsername.Text))
             {
                 MessageBox.Show("Username cannot be empty.");
             }
-            else if (this.TxtPassword.Password == string.Empty)
+            else if (string.IsNullOrEmpty(this.TxtPassword.Password))
             {
                 MessageBox.Show("Password cannot be empty.");
             }
             else
             {
-                var result = false;
-
-                var user = new UserClass(this.TxtUsername.Text, this.TxtPassword.Password, false);
-                var reg = new Thread(() =>
+                user = new UserClass(this.TxtUsername.Text, this.TxtPassword.Password, false);
+                var regTask = new Task<bool>(Reg); 
+                regTask.Start();
+                var progress = 0;
+                while (running)
                 {
-                    result = Reg(user);
-                });
-                reg.Name = "Register thread";
-                reg.Priority = ThreadPriority.BelowNormal;
-                reg.Start();
-                reg.Join();
+                    progressBar1.Value = progress;
+                    ++progress;
+                    if (progress > 10)
+                    {
+                        progress = 0;
+                    }
+                }
+
+                var result = regTask.Result;
+
                 switch (result)
                 {
                     case false:
@@ -77,25 +90,46 @@ namespace CIS499_Client
                         break;
                 }
             }
-
         }
 
         /// <summary>
         /// Method to register the user. For use by threading to prevent UI thread blocking.
         /// </summary>
-        /// <param name="user">
-        /// The user.
-        /// </param>
         /// <returns>
         /// Returns whether the registration was successful.
         /// </returns>
-        private static bool Reg(UserClass user)
+        private bool Reg()
         {
-            
-            var net = new Networking(user);
-            var result = net.Register(user);
-            net.Dispose();
+            var net = new Networking(this.user);
+            var result = false;
+            try
+            {
+                result = net.Register(user);
+            }
+            catch
+            {
+            }
+            finally
+            {
+                net.CloseNetwork();
+            }
+
+            running = false;
             return result;
+        }
+
+        /// <summary>
+        /// The button cancel click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void BtnCancelClick(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
         }
     }
 }

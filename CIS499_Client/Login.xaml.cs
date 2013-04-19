@@ -11,8 +11,8 @@ namespace CIS499_Client
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Input;
 
     using UserClass;
 
@@ -24,15 +24,17 @@ namespace CIS499_Client
         public delegate void AsyncMethodCaller();
 
         public delegate bool AsyncNetworkCaller(Networking net);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Login"/> class.
         /// </summary>
         public Login()
         {
-            AsyncMethodCaller async = new AsyncMethodCaller(Settings.Default.Reload);
+            App.TaskFortress.StartNew(Settings.Default.Reload);
+            //AsyncMethodCaller async = new AsyncMethodCaller(Settings.Default.Reload);
             
-            IAsyncResult result = async.BeginInvoke(null, null);
-            async.EndInvoke(result);
+            //IAsyncResult result = async.BeginInvoke(null, null);
+            //async.EndInvoke(result);
             //var setLoad = new Task();
             //setLoad.Start();
             InitializeComponent();
@@ -98,9 +100,12 @@ namespace CIS499_Client
         /// </param>
         private void BtnLoginClick(object sender, RoutedEventArgs e)
         {
-            UserClass user = new UserClass(this.TxtUsername.Text, this.TxtPassword.Password, false);
+            var user = new UserClass(this.TxtUsername.Text, this.TxtPassword.Password, false);
             var result = false;
             var networking = new Networking(user);
+            // AsyncNetworkCaller asyncNetwork = LoginThread;
+            // asyncNetwork.BeginInvoke(networking, Callback, null);
+            //asyncNetwork.Invoke()
             var login = new Thread(() =>
                 {
                     result = LoginThread(networking);
@@ -109,12 +114,19 @@ namespace CIS499_Client
             login.Join();
              
             // Networking networking = new Networking();
-            if (result)
+            if (!result)
             {
-                var main = new MainWindow(networking);
-                main.Show();
-                this.Close();
+                return;
             }
+
+            var main = new MainWindow(networking);
+            main.Show();
+            this.Close();
+        }
+
+        private void Callback(IAsyncResult ar)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -128,8 +140,25 @@ namespace CIS499_Client
         /// </returns>
         private static bool LoginThread(Networking net)
         {
-            var result = net.Login(net.TheUser);
-            return result;
+            return net.Login(net.TheUser);
+            
+        }
+
+        /// <summary>
+        /// This handles when the users presses the enter key in the password field
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void PasswordEnter(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.BtnLoginClick(sender, e);
+            }
         }
     }
 }

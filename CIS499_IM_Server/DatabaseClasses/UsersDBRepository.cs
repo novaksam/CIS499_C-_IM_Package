@@ -13,9 +13,9 @@ namespace CIS499_IM_Server.DatabaseClasses
     using System.Data;
     using System.Data.SqlServerCe;
     using System.Diagnostics.CodeAnalysis;
+    using System.Threading;
 
     using UserClass;
-    using System.Threading;
 
     /// <summary>
     ///     Default IUsers_DBRepository implementation
@@ -29,6 +29,9 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </summary>
         public SqlCeTransaction Transaction { get; set; }
 
+        /// <summary>
+        /// The mutex.
+        /// </summary>
         private static Mutex mutex = new Mutex(false, "Database_Mutex");
 
         #endregion
@@ -91,15 +94,17 @@ namespace CIS499_IM_Server.DatabaseClasses
                     "INSERT INTO Users_DB (UserName, PassHash, Friends)  VALUES (@UserName, @PassHash, @Friends)";
 
                 command.Parameters.Add("@UserName", SqlDbType.NVarChar);
-                //command.Parameters["@UserName"].Value = userName != null ? (object)userName : DBNull.Value;
+                // command.Parameters["@UserName"].Value = userName != null ? (object)userName : DBNull.Value;
                 command.Parameters["@UserName"].Value = userName;
+                
                 command.Parameters.Add("@PassHash", SqlDbType.NVarChar);
-                //command.Parameters["@PassHash"].Value = passHash != null ? (object)passHash : DBNull.Value;
+                // command.Parameters["@PassHash"].Value = passHash != null ? (object)passHash : DBNull.Value;
                 command.Parameters["@PassHash"].Value = passHash;
+
                 command.Parameters.Add("@Friends", SqlDbType.VarBinary);
                 // command.Parameters["@Friends"].Value = friends != null ? (object)UserClass.StoreFriends(friends) : DBNull.Value;
-                command.Parameters["@Friends"].Value = UserClass.StoreFriends(friends);
-                var tim = command.ExecuteNonQuery();
+                command.Parameters["@Friends"].Value = (object)UserClass.StoreFriends(friends);
+                command.ExecuteNonQuery();
             }
         }
 
@@ -141,7 +146,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                 command.Parameters["@UserName"].Value = userName != null ? (object)userName : DBNull.Value;
                 command.Parameters.Add("@PassHash", SqlDbType.NVarChar);
                 command.Parameters["@PassHash"].Value = passHash != null ? (object)passHash : DBNull.Value;
-                command.Parameters.Add("@Friends", SqlDbType.Image);
+                command.Parameters.Add("@Friends", SqlDbType.VarBinary);
                 command.Parameters["@Friends"].Value = friends != null ? (object)friends : DBNull.Value;
                 command.ExecuteNonQuery();
             }
@@ -182,12 +187,12 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Delete(UsersDB item)
         {
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE UserID = @UserID";
 
                 command.Parameters.Add("@UserID", SqlDbType.Int);
-                command.Parameters["@UserID"].Value = item.UserId != null ? (object)item.UserId : DBNull.Value;
+                command.Parameters["@UserID"].Value = item.UserId;
                 command.ExecuteNonQuery();
             }
         }
@@ -200,7 +205,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Delete(IEnumerable<UsersDB> items)
         {
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE UserID = @UserID";
                 command.Parameters.Add("@UserID", SqlDbType.Int);
@@ -208,7 +213,7 @@ namespace CIS499_IM_Server.DatabaseClasses
 
                 foreach (UsersDB item in items)
                 {
-                    command.Parameters["@UserID"].Value = item.UserId != null ? (object)item.UserId : DBNull.Value;
+                    command.Parameters["@UserID"].Value = item.UserId;
 
                     command.ExecuteNonQuery();
                 }
@@ -226,7 +231,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public int DeleteByFriends(byte[] friends)
         {
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "DELETE FROM [Users_DB] WHERE Friends=@Friends";
                 command.Parameters.Add("@Friends", SqlDbType.Image);
@@ -531,6 +536,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public List<UsersDB> SelectByUserID(int? userID)
         {
+            mutex.WaitOne();
             var list = new List<UsersDB>();
             using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
             {
@@ -562,6 +568,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                 }
             }
 
+            mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
 
@@ -582,9 +589,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </exception>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1627:DocumentationTextMustNotBeEmpty", 
             Justification = "Reviewed. Suppression is OK here.")]
+        [Obsolete]
         public List<UsersDB> SelectByUserId(int userId)
         {
-            throw new NotImplementedException();
+            return this.SelectByUserID(userId);
         }
 
         /// <summary>
@@ -607,6 +615,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </exception>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1627:DocumentationTextMustNotBeEmpty", 
             Justification = "Reviewed. Suppression is OK here.")]
+        [Obsolete]
         public List<UsersDB> SelectByUserId(int userId, int count)
         {
             throw new NotImplementedException();
@@ -628,6 +637,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         ///     </see>
         ///     .
         /// </returns>
+        [Obsolete]
         public List<UsersDB> SelectByUserId(int? userID, int count)
         {
             var list = new List<UsersDB>();
@@ -665,6 +675,53 @@ namespace CIS499_IM_Server.DatabaseClasses
         }
 
         /// <summary>
+        /// Search for users in the database
+        /// </summary>
+        /// <param name="userName">Username to search for</param>
+        /// <param name="user">User doing the search</param>
+        /// <returns>List of users</returns>
+        public List<UserClass> SearchByUserName(string userName, UserClass user)
+        {
+            mutex.WaitOne();
+            var list = new List<UserClass>();
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            {
+                if (userName != null && userName.Length < 1)
+                {
+                    command.CommandText = "SELECT UserID, UserName FROM Users_DB WHERE (UserName LIKE @UserName) AND (NOT (UserName = @Exclude))";
+                    
+                    // command.Parameters.AddWithValue("@UserName", "'%" + userName + "%'");
+                    command.Parameters.Add("@UserName", SqlDbType.NVarChar).Value = "%" + userName + "%";
+                    
+                    // command.Parameters["@UserName"].Value = userName;
+                    // TODO excluded searcher
+                }
+                else
+                {
+                    command.CommandText = "SELECT UserID, UserName FROM Users_DB WHERE (NOT (UserName = @Exclude))";
+                }
+
+                command.Parameters.AddWithValue("@Exclude", user.UserName);
+
+                using (SqlCeDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var item = new UserClass
+                                       {
+                                           UserId = (int)reader["UserID"],
+                                           UserName = reader["UserName"] as string
+                                       };
+                        list.Add(item);
+                    }
+                }
+            }
+
+            mutex.ReleaseMutex();
+            return list;
+        }
+
+        /// <summary>
         /// Retrieves a collection of items by UserName
         /// </summary>
         /// <param name="userName">
@@ -698,18 +755,19 @@ namespace CIS499_IM_Server.DatabaseClasses
                 {
                     while (reader.Read())
                     {
-                        var item = new UsersDB
-                                       {
-                                           UserId = (int)reader["UserID"],
-                                           UserName = reader.IsDBNull(1) ? null : reader["UserName"] as string, 
-                                           PassHash = reader.IsDBNull(2) ? null : reader["PassHash"] as string, 
-                                           Friends =
-                                               reader.IsDBNull(3) ? null : reader["Friends"] as List<UserClass>
-                                       };
+                        var item = new UsersDB();
+                        item.UserId = (int)reader["UserID"];
+                        item.UserName = reader["UserName"] as string;
+                        item.PasswordHash = reader["PassHash"] as string;
+                        // item.Friends = reader.IsDBNull(3) ? new List<UserClass>() : UserClass.RestoreFriends(reader["Friends"] as byte[]);
+                        var taco = reader["Friends"] as byte[];
+                        var taco2 = UserClass.RestoreFriends(taco);
+                        item.Friends = taco2;
                         list.Add(item);
                     }
                 }
             }
+
             mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
@@ -734,7 +792,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         {
             mutex.WaitOne();
             var list = new List<UsersDB>();
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 if (userName != null)
                 {
@@ -747,7 +805,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     command.CommandText = "SELECT TOP(" + count + ") * FROM Users_DB WHERE UserName IS NULL";
                 }
 
-                using (SqlCeDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -763,6 +821,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
+
             mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
@@ -779,7 +838,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public UsersDB[] ToArray()
         {
-            List<UsersDB> list = this.ToList();
+            var list = this.ToList();
             return list != null ? list.ToArray() : null;
         }
 
@@ -816,10 +875,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         {
             mutex.WaitOne();
             var list = new List<UsersDB>();
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = "SELECT * FROM Users_DB";
-                using (SqlCeDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -835,6 +894,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
+
             mutex.ReleaseMutex();
             return list.Count > 0 ? list : null;
         }
@@ -856,10 +916,10 @@ namespace CIS499_IM_Server.DatabaseClasses
         {
             mutex.WaitOne();
             var list = new List<UsersDB>();
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText = string.Format("SELECT TOP({0}) * FROM Users_DB", count);
-                using (SqlCeDataReader reader = command.ExecuteReader())
+                using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -875,6 +935,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     }
                 }
             }
+
             mutex.ReleaseMutex();
 
             return list.Count > 0 ? list : null;
@@ -894,7 +955,7 @@ namespace CIS499_IM_Server.DatabaseClasses
                     "UPDATE [Users_DB] SET UserName = @UserName, PassHash = @PassHash, Friends = @Friends WHERE UserID = @UserID";
 
                 command.Parameters.Add("@UserID", SqlDbType.Int);
-                command.Parameters["@UserID"].Value = item.UserId != null ? (object)item.UserId : DBNull.Value;
+                command.Parameters["@UserID"].Value = item.UserId;
                 command.Parameters.Add("@UserName", SqlDbType.NVarChar);
                 command.Parameters["@UserName"].Value = item.UserName != null ? (object)item.UserName : DBNull.Value;
                 command.Parameters.Add("@PassHash", SqlDbType.NVarChar);
@@ -906,6 +967,30 @@ namespace CIS499_IM_Server.DatabaseClasses
         }
 
         /// <summary>
+        /// The update.
+        /// </summary>
+        /// <param name="item">
+        /// The item.
+        /// </param>
+        public void UpdateFriends(UserClass item)
+        {
+            mutex.WaitOne();
+            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            {
+                command.CommandText =
+                    "UPDATE [Users_DB] SET  Friends = @Friends WHERE UserID = @UserID";
+
+                command.Parameters.Add("@UserID", SqlDbType.Int);
+                command.Parameters["@UserID"].Value = item.UserId;
+                command.Parameters.Add("@Friends", SqlDbType.Image);
+                command.Parameters["@Friends"].Value = UserClass.StoreFriends(item.Friends);
+                command.ExecuteNonQuery();
+            }
+
+            mutex.ReleaseMutex();
+        }
+
+        /// <summary>
         /// Updates a collection of items
         /// </summary>
         /// <param name="items">
@@ -913,7 +998,7 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </param>
         public void Update(IEnumerable<UsersDB> items)
         {
-            using (SqlCeCommand command = EntityBase.CreateCommand(this.Transaction))
+            using (var command = EntityBase.CreateCommand(this.Transaction))
             {
                 command.CommandText =
                     "UPDATE [Users_DB] SET UserName = @UserName, PassHash = @PassHash, Friends = @Friends WHERE UserID = @UserID";
@@ -923,9 +1008,9 @@ namespace CIS499_IM_Server.DatabaseClasses
                 command.Parameters.Add("@Friends", SqlDbType.Image);
                 command.Prepare();
 
-                foreach (UsersDB item in items)
+                foreach (var item in items)
                 {
-                    command.Parameters["@UserID"].Value = item.UserId != null ? (object)item.UserId : DBNull.Value;
+                    command.Parameters["@UserID"].Value = item.UserId;
                     command.Parameters["@UserName"].Value = item.UserName != null ? (object)item.UserName : DBNull.Value;
                     command.Parameters["@PassHash"].Value = item.PassHash != null ? (object)item.PassHash : DBNull.Value;
                     command.Parameters["@Friends"].Value = item.Friends != null ? (object)item.Friends : DBNull.Value;

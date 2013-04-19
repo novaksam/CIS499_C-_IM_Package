@@ -9,8 +9,8 @@
 
 namespace CIS499_Client
 {
-    using System.Windows;
-    using System.Threading;
+    using System.Threading.Tasks;
+
     using UserClass;
 
     /// <summary>
@@ -21,14 +21,17 @@ namespace CIS499_Client
         /// <summary>
         /// The user.
         /// </summary>
-        internal static UserClass User = new UserClass();
+        // internal static UserClass User = new UserClass();
 
         /// <summary>
         /// The net.
         /// </summary>
-        internal static Networking Net { get; set; }
+        internal static Networking Net { get; private set; }
 
-        
+        /// <summary>
+        /// The task fortress.
+        /// </summary>
+        internal static TaskFactory TaskFortress = new TaskFactory();
 
         ///// <summary>
         ///// The fill user.

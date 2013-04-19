@@ -36,7 +36,8 @@ namespace CIS499_IM_Server.DatabaseClasses
             using (SqlCeCommand command = EntityBase.CreateCommand(transaction))
             {
                 command.CommandText =
-                    "CREATE TABLE [Users_DB](UserID INT IDENTITY(100,1) PRIMARY KEY NOT NULL, UserName NVARCHAR(128) NOT NULL, PassHash NVARCHAR(128) NOT NULL, Friends VARBINARY)";
+                    "CREATE TABLE Users_DB(UserID INT IDENTITY(100,1) PRIMARY KEY NOT NULL, UserName NVARCHAR(128) NOT NULL, PassHash NVARCHAR(128) NOT NULL, Friends VARBINARY(5000))";
+                command.Prepare();
                 resultCount += command.ExecuteNonQuery();
 
                 transaction.Commit();

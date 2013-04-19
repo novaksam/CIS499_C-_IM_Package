@@ -11,7 +11,7 @@
                 <MenuItem Header="Exit" Name="BtnQuit" Click="BtnQuitClick" />
             </MenuItem>
         </Menu>
-        <PasswordBox Height="23" HorizontalAlignment="Left" Margin="84,111,0,0" Name="TxtPassword" VerticalAlignment="Top" Width="120" TabIndex="2" />
+        <PasswordBox Height="23" HorizontalAlignment="Left" Margin="84,111,0,0" Name="TxtPassword" VerticalAlignment="Top" Width="120" TabIndex="2" KeyUp="PasswordEnter" />
         <Button Content="Sign in" Height="23" HorizontalAlignment="Center" Margin="0,150,0,0" Name="BtnLogin" VerticalAlignment="Top" Width="75" Padding="0" TabIndex="3" Click="BtnLoginClick" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="84,65,0,0" Name="TxtUsername" VerticalAlignment="Top" Width="120" TabIndex="1" />
         <Label Content="Username:" Height="28" HorizontalAlignment="Left" Margin="15,65,0,0" Name="Label1" VerticalAlignment="Top" />

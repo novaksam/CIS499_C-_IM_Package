@@ -57,12 +57,12 @@ namespace Packet
         /// <summary>
         ///     UserID of the target
         /// </summary>
-        internal int RecipientId { get; private set; }
+        public int RecipientId { get; private set; }
 
         /// <summary>
         ///     UserID of the sender
         /// </summary>
-        internal int SenderId { get; private set; }
+        public int SenderId { get; private set; }
 
         #endregion
 

@@ -10,14 +10,13 @@
 namespace CIS499_Client
 {
     using System;
+    using System.Collections.Generic;
+    using System.Configuration;
     using System.IO;
     using System.Net.Security;
     using System.Net.Sockets;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
-    using CIS499_Client.Properties;
-    using System.Configuration;
-    using System.Threading;
 
     using Imstatuses;
 
@@ -28,7 +27,7 @@ namespace CIS499_Client
     /// <summary>
     /// The networking.
     /// </summary>
-    public class Networking : IDisposable
+    public sealed class Networking : IDisposable
     {
         /// <summary>
         /// The TCP client.
@@ -44,21 +43,6 @@ namespace CIS499_Client
         /// The writer.
         /// </summary>
         private BinaryWriter writer;
-
-        /// <summary>
-        /// The failed connect.
-        /// </summary>
-        //private SocketException failedConnect;// = new SocketException(543);
-
-        /// <summary>
-        /// Wrong password exception
-        /// </summary>
-        //private Exception wrongPasswordException;// = new Exception("Password incorrect");
-
-        /// <summary>
-        /// No user exception
-        /// </summary>
-        //private Exception noUserException;// = new Exception("No user with that Username exists.");
 
         /// <summary>
         /// The security stream.
@@ -78,7 +62,7 @@ namespace CIS499_Client
         /// <summary>
         /// Boolean for the connection state
         /// </summary>
-        private Boolean loggedIn;
+        private bool loggedIn;
 
         /// <summary>
         /// The network stream.
@@ -102,7 +86,7 @@ namespace CIS499_Client
 
             this.TheUser = user.Clone() as UserClass;
             // Creates the connection
-            var time = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
+            // var time = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
             this.tcpClient = new TcpClient(Settings.Default.Server, Settings.Default.Port);
 
             if (!this.tcpClient.Connected)
@@ -118,9 +102,9 @@ namespace CIS499_Client
             this.ssl.AuthenticateAsClient(Settings.Default.Cert_Owner);
             this.writer = new BinaryWriter(this.ssl, Encoding.UTF8);
             this.reader = new BinaryReader(this.ssl, Encoding.UTF8);
-
+            
             // Get the hello from the server
-            var hello = reader.ReadInt32();
+            var hello = this.reader.ReadInt32();
             if (hello == ImStatuses.ImHello)
             {
                 // Send a hello to the server
@@ -210,6 +194,106 @@ namespace CIS499_Client
             return false;
         }
 
+        /// <summary>
+        /// The search.
+        /// </summary>
+        /// <param name="name">
+        /// The name.
+        /// </param>
+        /// <returns>
+        /// The <see cref="UserClass"/>.
+        /// </returns>
+        internal List<UserClass> Search(string name)
+        {
+            this.writer.Write(ImStatuses.ImSearch);
+            var usr = UserClass.Serialize(this.TheUser);
+            this.writer.Write(usr.Length);
+            this.writer.Write(usr);
+            this.writer.Write(name);
+            this.writer.Flush();
+            var list = new List<UserClass>();
+
+            var temp = this.reader.ReadByte();
+            if (temp != ImStatuses.ImSearch)
+            {
+                return list;
+            }
+
+            // Get the length of the incoming byte array
+            int length = this.reader.ReadInt32();
+
+            // Read said byte array
+            byte[] use = this.reader.ReadBytes(length);
+
+            // Convert that array into a user.
+            list = UserClass.RestoreFriends(use);
+
+            try
+            {
+                foreach (var b in this.TheUser.Friends)
+                {
+                    // TODO figure out why this won't work
+                    var worker2 = list.Contains(b);
+                    var worker = list.Remove(b);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            // Return the list
+
+            return list;
+        }
+
+        /// <summary>
+        /// The search delegate.
+        /// </summary>
+        /// <param name="name">
+        /// The name.
+        /// </param>
+        /// <returns>
+        /// The User class list
+        /// </returns>
+        internal delegate List<UserClass> SearchDelegate(string name);
+
+        /// <summary>
+        /// The add friend.
+        /// </summary>
+        /// <param name="user">
+        /// The user.
+        /// </param>
+        /// <param name="users">
+        /// The users.
+        /// </param>
+        internal void AddFriend(UserClass user, List<UserClass> users)
+        {
+            this.writer.Write(ImStatuses.ImAddFriend);
+            var usr = UserClass.Serialize(user);
+            this.writer.Write(usr.Length);
+            this.writer.Write(usr);
+            var addees = UserClass.StoreFriends(users);
+            this.writer.Write(addees.Length);
+            this.writer.Write(addees);
+            this.writer.Flush();
+
+            var temp = this.reader.ReadByte();
+            if (temp != ImStatuses.ImAddFriend)
+            {
+                return;
+            }
+
+            // Get the length of the incoming byte array
+            int length = this.reader.ReadInt32();
+
+            // Read said byte array
+            byte[] use = this.reader.ReadBytes(length);
+
+            // Convert that array into a user.
+            this.TheUser.Friends = UserClass.RestoreFriends(use);
+        }
+
         // private void Ping(TcpClient client)
         // {
         //    NetworkStream stream = client.GetStream();
@@ -232,15 +316,23 @@ namespace CIS499_Client
                 // Read the incoming status
                 var type = this.reader.ReadByte();
 
-                if (type == ImStatuses.ImIsAvailable)
+                switch (type)
                 {
-                    var who = this.reader.ReadString();
+                    case ImStatuses.ImIsAvailable:
+                        {
+                            var who = this.reader.ReadString();
 
-                    this.writer.Write(ImStatuses.ImIsAvailable);
-                    this.writer.Write(user.UserId);
-                    this.writer.Flush();
+                            this.writer.Write(ImStatuses.ImIsAvailable);
+                            this.writer.Write(user.UserId);
+                            this.writer.Flush();
+                        }
+                        break;
+                    case ImStatuses.ImSend:
+                        {
+                            
+                        }
+                        break;
                 }
-
 
                 // TcpClient tcpClient = this.listener.AcceptTcpClient();  // Accept incoming connection.
                 // listener.Start();
@@ -310,6 +402,14 @@ namespace CIS499_Client
         }
 
         /// <summary>
+        /// Close all network related objects
+        /// </summary>
+        internal void CloseNetwork()
+        {
+            this.Dispose();
+        }
+
+        /// <summary>
         /// The validate cert.
         /// </summary>
         /// <param name="sender">
@@ -352,14 +452,8 @@ namespace CIS499_Client
             this.stream.Close();
             this.stream.Dispose();
             this.TheUser.Dispose();
-        }
-
-        /// <summary>
-        /// Interface based dispose method
-        /// </summary>
-        void IDisposable.Dispose()
-        {
-            this.Dispose();
+            this.tcpClient.Close();
+            GC.SuppressFinalize(this);
         }
     }
 }

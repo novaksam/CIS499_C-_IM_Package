@@ -78,5 +78,20 @@ namespace Imstatuses
         /// Logout byte.
         /// </summary>
         public const byte ImLogout = 11;
+
+        /// <summary>
+        /// Search byte
+        /// </summary>
+        public const byte ImSearch = 12;
+
+        /// <summary>
+        /// Add friend byte.
+        /// </summary>
+        public const byte ImAddFriend = 13;
+
+        /// <summary>
+        /// Error byte
+        /// </summary>
+        public const byte ImError = 14;
     }
 }

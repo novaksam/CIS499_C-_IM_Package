@@ -11,6 +11,7 @@ namespace CIS499_IM_Server.DatabaseClasses
     using System.Configuration;
     using System.Data;
     using System.Data.SqlServerCe;
+    using System.IO;
 
     /// <summary>
     ///     Base class for all data access repositories
@@ -111,7 +112,29 @@ namespace CIS499_IM_Server.DatabaseClasses
         /// </returns>
         public static SqlCeCommand CreateCommand(SqlCeTransaction transaction)
         {
-            SqlCeCommand command = Connection.CreateCommand();
+            // TODO come up with a better way to check for the database file
+            SqlCeCommand command;
+                
+                if (!File.Exists(ConfigurationSettings.AppSettings["DB_File"]))
+                {
+                    DatabaseFile.CreateDatabase();
+                }
+                command = Connection.CreateCommand();
+            //try
+            //{
+            //    command = Connection.CreateCommand();
+            //}
+            //catch (SqlCeException notFound)
+            //{
+                
+            //    if (notFound.Message.Contains("be found"))
+            //    {
+                    
+            //    }
+
+            //    command = Connection.CreateCommand();
+            //}
+
             command.Transaction = transaction;
             return command;
         }

@@ -14,6 +14,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserClass", "UserClass\UserClass.csproj", "{A8A43E77-2EAA-443F-BF95-9985FC289D34}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27DA9E47-BBA9-40B9-9BBF-7BBAFADABD13}"
+	ProjectSection(SolutionItems) = preProject
+		CIS499_IM_Package.vsmdi = CIS499_IM_Package.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Packet", "Packet\Packet.csproj", "{BF81A1F7-0BF8-460C-A6F9-BAF209F39779}"
 EndProject

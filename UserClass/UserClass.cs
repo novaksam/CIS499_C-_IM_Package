@@ -18,7 +18,7 @@ namespace UserClass
     ///     The user class.
     /// </summary>
     [Serializable]
-    public class UserClass : IDisposable, ICloneable
+    public class UserClass : IDisposable, ICloneable, IEquatable<UserClass>
     {
         #region Constructors and Destructors
 
@@ -215,6 +215,35 @@ namespace UserClass
         }
 
         /// <summary>
+        /// The equals.
+        /// </summary>
+        /// <param name="other">
+        /// The other.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        public bool Equals(UserClass other)
+        {
+            return this.UserId == other.UserId && 
+                this.UserName == other.UserName;
+        }
+
+        /// <summary>
+        /// The equals.
+        /// </summary>
+        /// <param name="obj">
+        /// The object.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as UserClass);
+        }
+
+        /// <summary>
         ///     The to string.
         /// </summary>
         /// <returns>
@@ -223,6 +252,17 @@ namespace UserClass
         public override string ToString()
         {
             return this.UserName;
+        }
+
+        /// <summary>
+        /// The get hash code.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="int"/>.
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return this.UserName.GetHashCode();
         }
 
         #endregion
